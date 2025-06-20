@@ -1,0 +1,68 @@
+package view
+
+templ Meta() {
+    <title>Hello, World!</title>
+    <meta charset="utf-8" />
+    <link rel="icon" href="/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="A simple web application built with Go and Templ">
+    <link rel="canonical" href="https://example.com/your-page">
+    <meta name="keywords" content="go, templ, web development">
+    <meta name="author" content="Your Name">
+    <meta name="robots" content="index, follow">
+    <meta property="og:title" content="Hello, World!">
+    <meta property="og:description" content="A simple web application built with Go and Templ">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://your-domain.com">
+    <meta property="og:image" content="https://example.com/og-image.png">
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Hello, World!">
+    <meta name="twitter:description" content="A simple web application built with Go and Templ">
+    <meta name="twitter:image" content="https://example.com/twitter-card.png">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="/manifest.json" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="alternate" href="https://example.com/" hreflang="en" />
+    <link rel="alternate" href="https://example.com/ka/" hreflang="ka" />
+    <link rel="alternate" href="https://example.com/" hreflang="x-default" />
+    <link rel="preload" href="/fonts/my-font.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="sitemap" href="/sitemap.xml" />
+    <link rel="manifest" href="/site.webmanifest" />
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+                {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "https://example.com/"
+                },
+                {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "About",
+                "item": "https://example.com/about"
+                }
+            ]
+        }
+    </script>
+    <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            "name": "Goyard",
+            "url": "https://example.com",
+            "potentialAction": {
+                "@type": "SearchAction",
+                "target": "https://example.com/search?q={search_term_string}",
+                "query-input": "required name=search_term_string"
+            }
+        }
+    </script>
+    <noscript>Your browser does not support JavaScript or it is disabled.</noscript>
+}

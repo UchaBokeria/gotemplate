@@ -1,0 +1,189 @@
+@font-face {
+  font-family: 'Nino';
+  src:  url('../fonts/bpg-nino-mtavruli-master/bpg-nino-mtavruli-webfont.woff2') format('woff2'),
+        url('../fonts/bpg-nino-mtavruli-master/bpg-nino-mtavruli-webfont.woff') format('woff'),
+        url('../fonts/bpg-nino-mtavruli-master/bpg-nino-mtavruli-webfont.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Nino';
+  src:  url('../fonts/bpg-nino-mtavruli-bold-master/bpg-nino-mtavruli-bold-webfont.woff2') format('woff2'),
+        url('../fonts/bpg-nino-mtavruli-bold-master/bpg-nino-mtavruli-bold-webfont.woff') format('woff'),
+        url('../fonts/bpg-nino-mtavruli-bold-master/bpg-nino-mtavruli-bold-webfont.ttf') format('truetype');
+  font-style: normal;
+  font-weight: 900;
+}
+
+@font-face {
+  font-family: 'Deja';
+  src:  url('../fonts/dejavu-sans-master/dejavu-sans-webfont.woff2') format('woff2'),
+        url('../fonts/dejavu-sans-master/dejavu-sans-webfont.woff') format('woff'),
+        url('../fonts/dejavu-sans-master/dejavu-sans-webfont.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Deja';
+  src:  url('../fonts/dejavu-sans-bold-webfont/dejavu-sans-bold-webfont.woff2') format('woff2'),
+        url('../fonts/dejavu-sans-bold-webfont/dejavu-sans-bold-webfont.woff') format('woff'),
+        url('../fonts/dejavu-sans-bold-webfont/dejavu-sans-bold-webfont.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-weight: 700;
+}
+
+@font-face {
+  font-family: 'Arial';
+  src:  url('../fonts/bpg-arial-master/bpg-arial-webfont.woff2') format('woff2'),
+        url('../fonts/bpg-arial-master/bpg-arial-webfont.woff') format('woff'),
+        url('../fonts/bpg-arial-master/bpg-arial-webfont.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 900;
+  src: url('../fonts/Poppins/Poppins-Black.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 800;
+  src: url('../fonts/Poppins/Poppins-ExtraBold.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Poppins';
+  font-style: italic;
+  font-weight: normal;
+  src: url('../fonts/Poppins/Poppins-Italic.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 500;
+  src: url('../fonts/Poppins/Poppins-Medium.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 200;
+  src: url('../fonts/Poppins/Poppins-Light.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Poppins';
+  font-style: italic;
+  font-weight: 200;
+  src: url('../fonts/Poppins/Poppins-LightItalic.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Poppins';
+  font-style: italic;
+  font-weight: 900;
+  src: url('../fonts/Poppins/Poppins-BlackItalic.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Poppins';
+  font-style: italic;
+  font-weight: 800;
+  src: url('../fonts/Poppins/Poppins-ExtraBoldItalic.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 400;
+  src: url('../fonts/Poppins/Poppins-Regular.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Poppins';
+  font-style: italic;
+  font-weight: 100;
+  src: url('../fonts/Poppins/Poppins-ThinItalic.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 100;
+  src: url('../fonts/Poppins/Poppins-Thin.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 600;
+  src: url('../fonts/Poppins/Poppins-SemiBold.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Poppins';
+  font-style: italic;
+  font-weight: 600;
+  src: url('../fonts/Poppins/Poppins-SemiBoldItalic.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 700;
+  src: url('../fonts/Poppins/Poppins-Bold.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Poppins';
+  font-style: italic;
+  font-weight: 700;
+  src: url('../fonts/Poppins/Poppins-BoldItalic.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 200;
+  src: url('../fonts/Poppins/Poppins-ExtraLight.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Poppins';
+  font-style: italic;
+  font-weight: 200;
+  src: url('../fonts/Poppins/Poppins-ExtraLightItalic.ttf') format('truetype');
+}
+
+/* Nino Font */
+.font-nino {
+  font-family: 'Nino', sans-serif;
+  font-size: 1rem;
+  letter-spacing: 0.8px;
+}
+
+/* Arial Font */
+.font-arial {
+  font-family: 'Arial', sans-serif;
+}
+
+/* Deja Font */
+.font-deja {
+  font-family: 'Deja', sans-serif;
+  font-size: 1rem;
+  letter-spacing: 1px;
+}
+
+/* Poppins Font */
+.font-poppins {
+  font-size: 1rem;
+  font-family: 'Poppins', sans-serif;
+}

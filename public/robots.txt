@@ -1,0 +1,6 @@
+User-agent: *
+Disallow: /admin/
+Disallow: /private/
+Allow: /public/
+
+Sitemap: http://www.alfashop.ge/sitemap.xml

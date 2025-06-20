@@ -1,0 +1,17 @@
+package pages
+
+import (
+	"main/web/app/view"
+	"main/web/app/view/components"
+	"main/web/app/view/ui"
+)
+
+templ Landing() {
+    @view.Index() {
+        <main>
+            <h1>Hi</h1>
+            @components.Navbar()
+            @ui.Button()
+        </main>
+    }
+}

@@ -1,0 +1,76 @@
+@keyframes autoScrollCatalog {
+  0% {
+    /* Start scrolling from the top */
+    transform: translateX(0);
+  }
+  30% {
+      /* Scroll quickly to bottom */
+      transform: translateX(-600px);
+  }
+  60% {
+      /* Pause at the bottom */
+      transform: translateX(-1200px);
+  }
+  90% {
+    /* Scroll to the bottom */
+      transform: translateX(-1700px);
+  }
+  100% {
+    /* Scroll to the bottom */
+      transform: translateX(0);
+  }
+}
+
+@keyframes slider-2 {
+  0% { transform: translateX(0) }
+  50% { transform: translateX(0) }
+
+  50.01% { transform: translateX(-100%) }
+  100% { transform: translateX(-100%) }
+}
+
+@keyframes slider-3 {
+  0% { transform: translateX(0) }
+  33% { transform: translateX(0) }
+
+  33.33% { transform: translateX(-100%) }
+  66% { transform: translateX(-100%) }
+
+  66.33% { transform: translateX(-200%) }
+  99.33% { transform: translateX(-200%) }
+  
+  100% { transform: translateX(-300%) }
+}
+
+@keyframes slider-4 {
+  0% { transform: translateX(0) }
+  24% { transform: translateX(0) }
+
+  25% { transform: translateX(-100%) }
+  49% { transform: translateX(-100%) }
+
+  50% { transform: translateX(-200%) }
+  74% { transform: translateX(-200%) }
+
+  75% { transform: translateX(-300%) }
+  99% { transform: translateX(-300%) }
+  
+  100% { transform: translateX(-400%) }
+}
+
+@keyframes slider-5 {
+  0% { transform: translateX(0) }
+  19% { transform: translateX(0) }
+
+  20% { transform: translateX(-100%) }
+  39% { transform: translateX(-100%) }
+
+  40% { transform: translateX(-200%) }
+  59% { transform: translateX(-200%) }
+
+  60% { transform: translateX(-300%) }
+  79% { transform: translateX(-300%) }
+
+  80% { transform: translateX(-400%) }
+  100% { transform: translateX(-400%) }
+}
