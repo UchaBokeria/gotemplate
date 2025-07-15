@@ -1,7 +1,197 @@
 package pages
 
+import (
+	"main/web/app/view"
+	"main/web/app/view/components"
+)
+
 templ Auth() {
-    <div class="flex flex-col items-center justify-center h-screen">
-        <h1 class="text-2xl font-bold">Auth</h1>
+    @view.Index() {
+        @components.Navigation()
+        
+        <main class="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+            <div class="max-w-md w-full space-y-8">
+                @AuthCard()
+            </div>
+        </main>
+        
+        @components.Footer()
+    }
+}
+
+templ AuthCard() {
+    <div class="bg-white rounded-xl shadow-lg p-8" x-data="{ activeTab: 'login' }">
+        <!-- Logo and Header -->
+        <div class="text-center mb-8">
+            <div class="w-16 h-16 mx-auto rounded-lg flex items-center justify-center shadow-md mb-4" style="background: linear-gradient(135deg, #f4cc1d 0%, #e6b800 100%);">
+                <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24" style="color: #000755;">
+                    <path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.82,11.69,4.82,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.43-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/>
+                </svg>
+            </div>
+            <h2 class="text-3xl font-bold" style="color: #000755;">Welcome to Alfashop</h2>
+            <p class="text-gray-600 mt-2">Your trusted auto parts partner</p>
+        </div>
+
+        <!-- Tab Navigation -->
+        <div class="flex mb-6 bg-gray-100 rounded-lg p-1">
+            <button 
+                @click="activeTab = 'login'" 
+                :class="activeTab === 'login' ? 'text-blue-900 shadow-sm' : 'text-gray-600'"
+                class="flex-1 py-2 px-4 text-center font-medium text-sm rounded-md transition-all duration-200"
+                :style="activeTab === 'login' ? 'background-color: #f4cc1d; color: #000755;' : ''"
+            >
+                Login
+            </button>
+            <button 
+                @click="activeTab = 'register'" 
+                :class="activeTab === 'register' ? 'text-blue-900 shadow-sm' : 'text-gray-600'"
+                class="flex-1 py-2 px-4 text-center font-medium text-sm rounded-md transition-all duration-200"
+                :style="activeTab === 'register' ? 'background-color: #f4cc1d; color: #000755;' : ''"
+            >
+                Register
+            </button>
+        </div>
+
+        <!-- Login Form -->
+        <div x-show="activeTab === 'login'" x-transition class="space-y-6">
+            <form class="space-y-4" @submit.prevent="handleLogin">
+                <div>
+                    <label for="login-email" class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                    <input 
+                        type="email" 
+                        id="login-email" 
+                        name="email" 
+                        required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm form-input focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                        placeholder="Enter your email"
+                    />
+                </div>
+                
+                <div>
+                    <label for="login-password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                    <input 
+                        type="password" 
+                        id="login-password" 
+                        name="password" 
+                        required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm form-input focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                        placeholder="Enter your password"
+                    />
+                </div>
+                
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input 
+                            type="checkbox" 
+                            id="remember-me" 
+                            class="h-4 w-4 rounded border-gray-300 focus:ring-yellow-500"
+                            style="accent-color: #f4cc1d;"
+                        />
+                        <label for="remember-me" class="ml-2 block text-sm text-gray-700">Remember me</label>
+                    </div>
+                    <a href="#" class="text-sm hover:underline" style="color: #000755;">Forgot password?</a>
+                </div>
+                
+                <button 
+                    type="submit" 
+                    class="w-full py-3 px-4 text-blue-900 font-semibold rounded-md shadow-sm hover:shadow-md transition-all duration-200 hover:scale-105"
+                    style="background-color: #f4cc1d; color: #000755;"
+                >
+                    Sign In
+                </button>
+            </form>
+        </div>
+
+        <!-- Register Form -->
+        <div x-show="activeTab === 'register'" x-transition class="space-y-6">
+            <form class="space-y-4" @submit.prevent="handleRegister" x-data="{ password: '', confirmPassword: '' }">
+                <div>
+                    <label for="reg-email" class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                    <input 
+                        type="email" 
+                        id="reg-email" 
+                        name="email" 
+                        required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm form-input focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                        placeholder="Enter your email"
+                    />
+                </div>
+                
+                <div>
+                    <label for="reg-password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                    <input 
+                        type="password" 
+                        id="reg-password" 
+                        name="password" 
+                        required
+                        x-model="password"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm form-input focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                        placeholder="Create a password"
+                    />
+                </div>
+                
+                <div>
+                    <label for="confirm-password" class="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+                    <input 
+                        type="password" 
+                        id="confirm-password" 
+                        name="confirm_password" 
+                        required
+                        x-model="confirmPassword"
+                        :class="password && confirmPassword && password !== confirmPassword ? 'border-red-500' : ''"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm form-input focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
+                        placeholder="Confirm your password"
+                    />
+                    <p x-show="password && confirmPassword && password !== confirmPassword" class="text-red-500 text-xs mt-1">
+                        Passwords do not match
+                    </p>
+                </div>
+                
+                <div class="flex items-center">
+                    <input 
+                        type="checkbox" 
+                        id="terms" 
+                        required
+                        class="h-4 w-4 rounded border-gray-300 focus:ring-yellow-500"
+                        style="accent-color: #f4cc1d;"
+                    />
+                    <label for="terms" class="ml-2 block text-sm text-gray-700">
+                        I agree to the <a href="#" class="hover:underline" style="color: #000755;">Terms and Conditions</a>
+                    </label>
+                </div>
+                
+                <button 
+                    type="submit" 
+                    :disabled="password && confirmPassword && password !== confirmPassword"
+                    :class="password && confirmPassword && password !== confirmPassword ? 'opacity-50 cursor-not-allowed' : ''"
+                    class="w-full py-3 px-4 text-blue-900 font-semibold rounded-md shadow-sm hover:shadow-md transition-all duration-200 hover:scale-105"
+                    style="background-color: #f4cc1d; color: #000755;"
+                >
+                    Create Account
+                </button>
+            </form>
+        </div>
+
+        <!-- Additional Info -->
+        <div class="mt-8 text-center">
+            <p class="text-sm text-gray-600">
+                Need help? <a href="/about" class="hover:underline" style="color: #000755;">Contact our support team</a>
+            </p>
+        </div>
     </div>
+
+    <!-- Alpine.js Functions -->
+    <script>
+        function handleLogin() {
+            console.log('Login submitted');
+            // Add login logic here
+            alert('Login functionality will be implemented');
+        }
+
+        function handleRegister() {
+            console.log('Register submitted');
+            // Add registration logic here
+            alert('Registration functionality will be implemented');
+        }
+    </script>
 }

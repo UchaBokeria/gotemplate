@@ -4,7 +4,6 @@ import (
 	"main/web/app/view/pages"
 
 	"github.com/UchaBokeria/goyard/controller"
-	"github.com/a-h/templ"
 )
 
 func Index(ctx *controller.Context[any]) error {
@@ -12,6 +11,9 @@ func Index(ctx *controller.Context[any]) error {
 }
 
 func Products(ctx *controller.Context[any]) error {
-	return ctx.Html(templ.NopComponent)
+	return ctx.Html(pages.Products())
 }
 
+func About(ctx *controller.Context[any]) error {
+	return ctx.Html(pages.About())
+}

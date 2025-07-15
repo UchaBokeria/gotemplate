@@ -1,0 +1,177 @@
+package pages
+
+import (
+	"main/web/app/view"
+	"main/web/app/view/components"
+)
+
+templ About() {
+    @view.Index() {
+        @components.Navigation()
+        
+        <main class="min-h-screen bg-gray-50">
+            <!-- Hero Section -->
+            @AboutHero()
+            
+            <!-- Company Story -->
+            @CompanyStory()
+            
+            <!-- Mission & Values -->
+            @MissionValues()
+            
+            <!-- Team Section -->
+            @TeamSection()
+            
+            <!-- Stats Section -->
+            @StatsSection()
+        </main>
+        
+        @components.Footer()
+    }
+}
+
+templ AboutHero() {
+    <section class="bg-gradient-to-r from-blue-900 via-blue-800 to-blue-900 text-white py-20" style="background: linear-gradient(135deg, #000755 0%, #1e3a8a 50%, #000755 100%);">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h1 class="text-4xl md:text-6xl font-bold mb-6">About Alfashop</h1>
+            <p class="text-xl md:text-2xl mb-8 opacity-90">Your trusted partner in automotive excellence since 1995</p>
+            <div class="w-20 h-1 mx-auto rounded-full" style="background-color: #f4cc1d;"></div>
+        </div>
+    </section>
+}
+
+templ CompanyStory() {
+    <section class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="lg:grid lg:grid-cols-2 lg:gap-12 items-center">
+                <div>
+                    <h2 class="text-3xl font-bold mb-6" style="color: #000755;">Our Story</h2>
+                    <div class="space-y-6 text-gray-600">
+                        <p class="text-lg">
+                            Founded in 1995, Alfashop began as a small family-owned business with a simple mission: 
+                            to provide high-quality auto parts and exceptional service to our local community.
+                        </p>
+                        <p>
+                            Over the years, we've grown from a single storefront to a leading online retailer, 
+                            serving customers across the country. Our commitment to quality has never wavered - 
+                            we still personally test and approve every product we sell.
+                        </p>
+                        <p>
+                            Today, Alfashop is proud to offer one of the largest selections of air filters, 
+                            oil filters, and auto parts from the most trusted brands in the industry. 
+                            Our team of automotive experts ensures that every customer finds exactly what they need.
+                        </p>
+                    </div>
+                </div>
+                <div class="mt-8 lg:mt-0">
+                    <div class="bg-gray-100 rounded-lg p-8 h-96 flex items-center justify-center">
+                        <div class="text-center">
+                            <div class="w-24 h-24 mx-auto rounded-lg flex items-center justify-center mb-4 shadow-lg" style="background: linear-gradient(135deg, #f4cc1d 0%, #e6b800 100%);">
+                                <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 24 24" style="color: #000755;">
+                                    <path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.82,11.69,4.82,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.43-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/>
+                                </svg>
+                            </div>
+                            <p class="text-gray-500 text-lg">Quality parts since 1995</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+}
+
+templ MissionValues() {
+    <section class="py-16 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold mb-4" style="color: #000755;">Our Mission & Values</h2>
+                <p class="text-lg text-gray-600">The principles that drive everything we do</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                @ValueCard(
+                    "Quality First",
+                    "We source only the highest quality parts from trusted manufacturers, ensuring every product meets our rigorous standards.",
+                    "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z",
+                )
+                @ValueCard(
+                    "Customer Focus",
+                    "Our customers are at the heart of everything we do. We're committed to providing exceptional service and support.",
+                    "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z",
+                )
+                @ValueCard(
+                    "Innovation",
+                    "We continuously evolve our product selection and services to meet the changing needs of the automotive industry.",
+                    "M13 10V3L4 14h7v7l9-11h-7z",
+                )
+            </div>
+        </div>
+    </section>
+}
+
+templ ValueCard(title, description, iconPath string) {
+    <div class="text-center p-6 bg-white rounded-xl shadow-sm hover:shadow-lg transition-all duration-300">
+        <div class="w-16 h-16 mx-auto rounded-full flex items-center justify-center mb-4 shadow-md" style="background: linear-gradient(135deg, #f4cc1d 0%, #e6b800 100%);">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: #000755;">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={ iconPath }/>
+            </svg>
+        </div>
+        <h3 class="text-xl font-semibold mb-3" style="color: #000755;">{ title }</h3>
+        <p class="text-gray-600">{ description }</p>
+    </div>
+}
+
+templ TeamSection() {
+    <section class="py-16 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold mb-4" style="color: #000755;">Meet Our Team</h2>
+                <p class="text-lg text-gray-600">The automotive experts behind Alfashop</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                @TeamMember("Alex Rodriguez", "Founder & CEO", "With over 30 years in the automotive industry, Alex founded Alfashop with a vision to make quality auto parts accessible to everyone.")
+                @TeamMember("Sarah Chen", "Chief Technology Officer", "Sarah leads our technology initiatives, ensuring our platform provides the best user experience for finding the right parts.")
+                @TeamMember("Mike Johnson", "Head of Product Quality", "Mike oversees our quality assurance process, personally testing products to maintain our high standards.")
+            </div>
+        </div>
+    </section>
+}
+
+templ TeamMember(name, position, description string) {
+    <div class="text-center">
+        <div class="w-32 h-32 mx-auto rounded-full bg-gray-200 mb-4 flex items-center justify-center">
+            <svg class="w-16 h-16 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
+            </svg>
+        </div>
+        <h3 class="text-xl font-semibold mb-1" style="color: #000755;">{ name }</h3>
+        <p class="font-medium mb-3" style="color: #f4cc1d;">{ position }</p>
+        <p class="text-gray-600">{ description }</p>
+    </div>
+}
+
+templ StatsSection() {
+    <section class="py-16 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold mb-4" style="color: #000755;">Alfashop by the Numbers</h2>
+                <p class="text-lg text-gray-600">Our commitment to excellence shows in our results</p>
+            </div>
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+                @StatCard("50,000+", "Products Available")
+                @StatCard("250,000+", "Happy Customers")
+                @StatCard("99.5%", "Customer Satisfaction")
+                @StatCard("28 Years", "In Business")
+            </div>
+        </div>
+    </section>
+}
+
+templ StatCard(number, label string) {
+    <div class="text-center">
+        <div class="text-3xl md:text-4xl font-bold mb-2" style="color: #f4cc1d;">{ number }</div>
+        <div class="text-gray-600 font-medium">{ label }</div>
+    </div>
+} 
