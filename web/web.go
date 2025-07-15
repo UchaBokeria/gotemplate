@@ -3,7 +3,7 @@ package web
 import (
 	"main/web/app"
 
-	"github.com/UchaBokeria/goyard"
+	"github.com/UchaBokeria/goyard/goyard"
 	"github.com/labstack/echo/v4/middleware"
 )
 
@@ -11,7 +11,7 @@ func New() {
 	web := goyard.New()
 	web.Static("/", "./public/")
 	web.Pre(middleware.RemoveTrailingSlash())
-	web.Use(middleware.Logger())
+	// web.Use(middleware.Logger())
 	// web.Use(middleware.Recover())
 	// web.Use(middleware.CORS())
 	// web.Use(middleware.RateLimiter(middleware.NewRateLimiterMemoryStore(20)))
@@ -33,5 +33,5 @@ func New() {
 
 	// admin.New(web)
 	app.New(web)
-	web.Logger.Fatal(web.Start(":3000"))
+	web.Logger.Fatal(web.Run(":3000"))
 }

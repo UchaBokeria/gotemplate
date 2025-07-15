@@ -9,66 +9,73 @@
 @import url('daisyui.css');
 
 @layer base {
-    input[type="number"]::-webkit-inner-spin-button,
-    input[type="number"]::-webkit-outer-spin-button {
-        -webkit-appearance: none;
-        margin: 0;
-    }
+
+	input[type="number"]::-webkit-inner-spin-button,
+	input[type="number"]::-webkit-outer-spin-button {
+		-webkit-appearance: none;
+		margin: 0;
+	}
 }
 
 @layer utilities {
-    .htmx-request  {
-        display: flex !important;
-    }
+	.htmx-request {
+		display: flex !important;
+	}
 
-    /* Hide scrollbar for Chrome, Safari and Opera */
-    .no-scrollbar::-webkit-scrollbar {
-        display: none;
-    }
+	/* Hide scrollbar for Chrome, Safari and Opera */
+	.no-scrollbar::-webkit-scrollbar {
+		display: none;
+	}
 
-   /* Hide scrollbar for IE, Edge and Firefox */
-    .no-scrollbar {
-        -ms-overflow-style: none;  /* IE and Edge */
-        scrollbar-width: none;  /* Firefox */
-    }
+	/* Hide scrollbar for IE, Edge and Firefox */
+	.no-scrollbar {
+		-ms-overflow-style: none;
+		/* IE and Edge */
+		scrollbar-width: none;
+		/* Firefox */
+	}
 
-    .no-scrollbar-x {
-        -ms-overflow-style: none;  /* IE and Edge */
-        scrollbar-width: none;  /* Firefox */
-    }
+	.no-scrollbar-x {
+		-ms-overflow-style: none;
+		/* IE and Edge */
+		scrollbar-width: none;
+		/* Firefox */
+	}
 
-    .no-scrollbar-y {
-        -ms-overflow-style: none;  /* IE and Edge */
-        scrollbar-width: none;  /* Firefox */
-    }
+	.no-scrollbar-y {
+		-ms-overflow-style: none;
+		/* IE and Edge */
+		scrollbar-width: none;
+		/* Firefox */
+	}
 
-    .auto-scroll-catalog {
-        animation: autoScrollCatalog 26s infinite;
-    }
+	.auto-scroll-catalog {
+		animation: autoScrollCatalog 26s infinite;
+	}
 
-    .shadower {
-        transition-duration: 200ms;
-        box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
-    }
-    
-    .shadower:hover {
-        box-shadow: rgba(13, 38, 76, 0.19) 0px 9px 20px;
-    }
+	.shadower {
+		transition-duration: 200ms;
+		box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+	}
 
-    .shadow-mondegreen:hover {
-        box-shadow: 5px 5px #21569e,
-                10px 10px #21569e4d,
-                15px 15px #21569e33,
-                20px 20px #21569e1a,
-                25px 25px #21569e0d;
-        transition: all 1s;
-    }
+	.shadower:hover {
+		box-shadow: rgba(13, 38, 76, 0.19) 0px 9px 20px;
+	}
 
-    .bg-gradient {
-        background: linear-gradient(to right, #0a2c68 0, #008bd2 100%)
-    }
+	.shadow-mondegreen:hover {
+		box-shadow: 5px 5px #21569e,
+			10px 10px #21569e4d,
+			15px 15px #21569e33,
+			20px 20px #21569e1a,
+			25px 25px #21569e0d;
+		transition: all 1s;
+	}
 
-    .bg-gradient-center {
-        background: linear-gradient(to right, #0a2c68 0, #008bd2 50%, #0a2c68 100%);
-    }
+	.bg-gradient {
+		background: linear-gradient(to right, #0a2c68 0, #008bd2 100%)
+	}
+
+	.bg-gradient-center {
+		background: linear-gradient(to right, #0a2c68 0, #008bd2 50%, #0a2c68 100%);
+	}
 }

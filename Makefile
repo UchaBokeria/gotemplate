@@ -17,10 +17,6 @@ prepare:
 templ:
 	TEMPL_EXPERIMENT=rawgo templ generate -keep-orphaned-files
 
-.PHONY: templ-watch
-templ-watch:
-	TEMPL_EXPERIMENT=rawgo templ generate  --open-browser=false --proxy="http://localhost:3000" --watch
-
 
 .PHONY: tailwind
 tailwind:
@@ -39,9 +35,6 @@ build:
 	GOFLAGS="-mod=readonly -modcacherw" go build -o .-v -x -race -trimpath ./bin/app ./cmd/app/main.go
 
 .PHONY: air
-air:
-	air
-
 
 # Database Migration-Seeding-Parsing Commands
 .PHONY: migrate
