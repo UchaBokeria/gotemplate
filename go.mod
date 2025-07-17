@@ -13,7 +13,6 @@ require (
 )
 
 require (
-	github.com/UchaBokeria/goshad v1.2.3 // indirect
 	github.com/gabriel-vasile/mimetype v1.4.9 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect

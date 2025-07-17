@@ -1,0 +1,299 @@
+package pages
+
+import (
+	"main/web/admin/view"
+	"main/web/admin/view/ui"
+)
+
+templ Products() {
+	@view.AdminLayout() {
+		<script>
+			const productsConfig = {
+				filters: {
+					search: '',
+					categoryMulti: [],
+					statusMulti: []
+				},
+				pagination: {
+					currentPage: 1,
+					pageSize: 20,
+					totalPages: 1,
+					totalItems: 0
+				},
+				showDialog: false,
+				showConfirmDialog: false,
+				editingItem: null,
+				itemToDelete: null,
+				formData: {
+					name: '',
+					category: '',
+					price: '',
+					stock: '',
+					status: 'active',
+					description: ''
+				},
+
+				applyFilters() {
+					const params = new URLSearchParams();
+					if (this.filters.search) params.append('search', this.filters.search);
+					if (this.filters.categoryMulti.length) {
+						this.filters.categoryMulti.forEach(cat => params.append('categoryMulti', cat));
+					}
+					if (this.filters.statusMulti.length) {
+						this.filters.statusMulti.forEach(status => params.append('statusMulti', status));
+					}
+					
+					params.append('page', this.pagination.currentPage);
+					params.append('limit', this.pagination.pageSize);
+					
+					htmx.ajax('GET', `/admin/products/list?${params.toString()}`, {
+						target: '#products-table-container',
+						swap: 'innerHTML'
+					});
+				},
+
+				clearFilters() {
+					this.filters = {
+						search: '',
+						categoryMulti: [],
+						statusMulti: []
+					};
+					this.pagination.currentPage = 1;
+					this.applyFilters();
+				},
+
+				goToPage(page) {
+					if (page >= 1 && page <= this.pagination.totalPages) {
+						this.pagination.currentPage = page;
+						this.applyFilters();
+					}
+				},
+
+				previousPage() {
+					if (this.pagination.currentPage > 1) {
+						this.pagination.currentPage--;
+						this.applyFilters();
+					}
+				},
+
+				nextPage() {
+					if (this.pagination.currentPage < this.pagination.totalPages) {
+						this.pagination.currentPage++;
+						this.applyFilters();
+					}
+				},
+
+				addItem() {
+					this.resetForm();
+					this.editingItem = null;
+					this.showDialog = true;
+					this.$nextTick(() => this.setupForm());
+				},
+
+				editItem(item) {
+					this.resetForm();
+					this.editingItem = item;
+					this.formData = { 
+						name: item.name || '',
+						category: item.category || '',
+						price: item.price || '',
+						stock: item.stock || '',
+						status: item.status || 'active',
+						description: item.description || ''
+					};
+					this.showDialog = true;
+					this.$nextTick(() => this.setupForm());
+				},
+
+				resetForm() {
+					this.formData = {
+						name: '',
+						category: '',
+						price: '',
+						stock: '',
+						status: 'active',
+						description: ''
+					};
+				},
+
+				deleteItem(item) {
+					this.itemToDelete = item;
+					this.showConfirmDialog = true;
+				},
+
+				setupForm() {
+					const form = document.querySelector('#product-form');
+					if (form && this.editingItem) {
+						form.setAttribute('hx-put', `/admin/products/${this.editingItem.id}`);
+						form.setAttribute('hx-post', '');
+					} else if (form) {
+						form.setAttribute('hx-post', '/admin/products');
+						form.setAttribute('hx-put', '');
+					}
+				},
+
+				closeDialog() {
+					this.showDialog = false;
+					this.resetForm();
+					this.editingItem = null;
+				},
+
+				confirmAction() {
+					if (this.itemToDelete) {
+						htmx.ajax('DELETE', `/admin/products/${this.itemToDelete.id}`, {
+							target: '#products-table-container',
+							swap: 'innerHTML'
+						});
+						this.itemToDelete = null;
+					}
+				}
+			}
+		</script>
+
+		<div x-data="productsConfig">
+			@ui.AddButton("Products Management")
+			@ui.TableFilters()
+
+			<!-- Products Table Container -->
+			<div 
+				hx-get="/admin/products/list"
+				hx-trigger="load"
+				hx-target="#products-table-container"
+				hx-swap="innerHTML"
+				id="products-table-container"
+				class="overflow-hidden"
+			>
+				<!-- Loading state -->
+				<div class="bg-white rounded-lg shadow p-8 text-center">
+					<div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+					<p class="mt-4 text-gray-600">Loading products...</p>
+				</div>
+			</div>
+			
+			<!-- Pagination -->
+			@ui.Pagination()
+			
+			@ProductDialog()
+			@ui.ConfirmDialog("Delete Product", "Are you sure you want to delete this product? This action cannot be undone.")
+		</div>
+	}
+}
+
+templ ProductDialog() {
+	@ui.FormDialog("Product Details", "lg") {
+		<form 
+			class="space-y-4"
+			:hx-post="!editingItem ? '/admin/products' : null"
+			:hx-put="editingItem ? `/admin/products/${editingItem.id}` : null"
+			hx-target="#products-table-container"
+			hx-swap="innerHTML"
+			@htmx:after-request="if($event.detail.successful) closeDialog()"
+		>
+			<input type="hidden" name="Id" x-bind:value="editingItem ? editingItem.id : ''" />
+			
+			<div>
+				<label for="product-name" class="block text-sm font-medium text-gray-700 mb-1">Product Name</label>
+				<input 
+					type="text" 
+					id="product-name" 
+					name="Name"
+					x-model="formData.name"
+					required
+					class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+				/>
+			</div>
+			
+			<div>
+				<label for="product-category" class="block text-sm font-medium text-gray-700 mb-1">Category</label>
+				<select 
+					id="product-category" 
+					name="Category"
+					x-model="formData.category"
+					required
+					class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+				>
+					<option value="">Select a category</option>
+					<option value="Electronics">Electronics</option>
+					<option value="Clothing">Clothing</option>
+					<option value="Books">Books</option>
+					<option value="Home & Garden">Home & Garden</option>
+					<option value="Sports">Sports</option>
+					<option value="Beauty">Beauty</option>
+				</select>
+			</div>
+			
+			<div>
+				<label for="product-price" class="block text-sm font-medium text-gray-700 mb-1">Price</label>
+				<div class="relative">
+					<span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+					<input 
+						type="number" 
+						id="product-price" 
+						name="Price"
+						x-model="formData.price"
+						step="0.01"
+						min="0"
+						required
+						class="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+					/>
+				</div>
+			</div>
+			
+			<div>
+				<label for="product-stock" class="block text-sm font-medium text-gray-700 mb-1">Stock Quantity</label>
+				<input 
+					type="number" 
+					id="product-stock" 
+					name="Stock"
+					x-model="formData.stock"
+					min="0"
+					required
+					class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+				/>
+			</div>
+			
+			<div>
+				<label for="product-status" class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+				<select 
+					id="product-status" 
+					name="Status"
+					x-model="formData.status"
+					required
+					class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+				>
+					<option value="">Select status</option>
+					<option value="active">Active</option>
+					<option value="inactive">Inactive</option>
+					<option value="out_of_stock">Out of Stock</option>
+				</select>
+			</div>
+			
+			<div>
+				<label for="product-description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+				<textarea 
+					id="product-description" 
+					name="Description"
+					x-model="formData.description"
+					rows="4"
+					class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+				></textarea>
+			</div>
+			
+			<div class="flex justify-end space-x-3 pt-4">
+				<button 
+					type="button" 
+					@click="closeDialog()"
+					class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+				>
+					Cancel
+				</button>
+				<button 
+					type="submit"
+					class="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+				>
+					<span x-text="editingItem ? 'Update Product' : 'Create Product'"></span>
+				</button>
+			</div>
+		</form>
+	}
+} 

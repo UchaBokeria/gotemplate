@@ -1,0 +1,224 @@
+package pages
+
+import (
+	"main/web/admin/view"
+	"main/web/admin/view/ui"
+)
+
+templ Orders() {
+	@view.AdminLayout() {
+		<script>
+			const ordersConfig = {
+				filters: {
+					search: '',
+					statusMulti: [],
+					dateMulti: []
+				},
+				pagination: {
+					currentPage: 1,
+					pageSize: 20,
+					totalPages: 1,
+					totalItems: 0
+				},
+				showConfirmDialog: false,
+				itemToDelete: null,
+
+				applyFilters() {
+					const params = new URLSearchParams();
+					if (this.filters.search) params.append('search', this.filters.search);
+					if (this.filters.statusMulti.length) {
+						this.filters.statusMulti.forEach(status => params.append('statusMulti', status));
+					}
+					if (this.filters.dateMulti.length) {
+						this.filters.dateMulti.forEach(date => params.append('dateMulti', date));
+					}
+					
+					params.append('page', this.pagination.currentPage);
+					params.append('pageSize', this.pagination.pageSize);
+					
+					htmx.ajax('GET', `/admin/orders/list?${params.toString()}`, {
+						target: '#orders-table-container',
+						swap: 'innerHTML'
+					});
+				},
+
+				clearFilters() {
+					this.filters = {
+						search: '',
+						statusMulti: [],
+						dateMulti: []
+					};
+					this.pagination.currentPage = 1;
+					this.applyFilters();
+				},
+
+				goToPage(page) {
+					if (page >= 1 && page <= this.pagination.totalPages) {
+						this.pagination.currentPage = page;
+						this.applyFilters();
+					}
+				},
+
+				previousPage() {
+					this.goToPage(this.pagination.currentPage - 1);
+				},
+
+				nextPage() {
+					this.goToPage(this.pagination.currentPage + 1);
+				},
+
+				deleteItem(item) {
+					this.itemToDelete = item;
+					this.showConfirmDialog = true;
+				},
+
+				confirmAction() {
+					if (this.itemToDelete) {
+						htmx.ajax('DELETE', `/admin/orders/${this.itemToDelete.id}`, {
+							target: '#orders-table-container',
+							swap: 'innerHTML'
+						});
+						this.itemToDelete = null;
+					}
+				}
+			}
+		</script>
+
+		<div x-data="ordersConfig">
+			@OrdersFilters()
+			
+			<!-- Orders Table Container -->
+			<div 
+				hx-get="/admin/orders/list"
+				hx-trigger="load"
+				hx-target="#orders-table-container"
+				hx-swap="innerHTML"
+				id="orders-table-container"
+				class="overflow-hidden"
+			>
+				<!-- Loading state -->
+				<div class="bg-white rounded-lg shadow p-8 text-center">
+					<div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+					<p class="mt-4 text-gray-600">Loading orders...</p>
+				</div>
+			</div>
+			
+			<!-- Pagination -->
+			@ui.Pagination()
+			
+			<div id="order-dialog"></div>
+			@ui.ConfirmDialog("Delete Order", "Are you sure you want to delete this order? This action cannot be undone.")
+		</div>
+	}
+} 
+
+templ OrdersFilters() {
+	<div class="mb-6 bg-white p-4 rounded-lg shadow">
+		<div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+			<!-- Search -->
+			<div>
+				<label for="search" class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+				<input 
+					type="text" 
+					id="search"
+					x-model="filters.search"
+					@input="applyFilters()"
+					placeholder="Search orders, customers..."
+					class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+				/>
+			</div>
+			
+			<!-- Status Filter -->
+			<div x-data="{ open: false, statusOptions: ['pending', 'processing', 'shipped', 'completed', 'cancelled'], getStatusDisplayText() { return filters.statusMulti && filters.statusMulti.length > 0 ? (filters.statusMulti.length === 1 ? filters.statusMulti[0].charAt(0).toUpperCase() + filters.statusMulti[0].slice(1) : filters.statusMulti.length + ' selected') : 'All Statuses'; } }" 
+				 x-init="if (!filters.statusMulti) filters.statusMulti = []">
+				
+				<label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+				<div class="relative">
+					<button 
+						@click="open = !open"
+						class="w-full px-3 py-2 text-left border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+					>
+						<span x-text="getStatusDisplayText()"></span>
+						<svg class="w-5 h-5 float-right mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+						</svg>
+					</button>
+					<div 
+						x-show="open" 
+						@click.away="open = false"
+						x-transition
+						class="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto"
+					>
+						<template x-for="option in statusOptions">
+							<div 
+								@click="$event.stopPropagation(); if (filters.statusMulti.includes(option)) { filters.statusMulti = filters.statusMulti.filter(s => s !== option); } else { filters.statusMulti.push(option); } applyFilters();"
+								class="cursor-pointer select-none relative py-2 pl-3 pr-9 hover:bg-gray-50"
+							>
+								<div class="flex items-center">
+									<input 
+										type="checkbox" 
+										x-bind:checked="filters.statusMulti.includes(option)"
+										class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded mr-3"
+										readonly
+									/>
+									<span class="block truncate font-normal capitalize" x-text="option"></span>
+								</div>
+							</div>
+						</template>
+					</div>
+				</div>
+			</div>
+			
+			<!-- Date Filter -->
+			<div x-data="{ open: false, dateOptions: ['today', 'week', 'month'], getDateDisplayText() { return filters.dateMulti && filters.dateMulti.length > 0 ? (filters.dateMulti.length === 1 ? filters.dateMulti[0].charAt(0).toUpperCase() + filters.dateMulti[0].slice(1) : filters.dateMulti.length + ' selected') : 'All Dates'; } }" 
+				 x-init="if (!filters.dateMulti) filters.dateMulti = []">
+				
+				<label class="block text-sm font-medium text-gray-700 mb-1">Date Range</label>
+				<div class="relative">
+					<button 
+						@click="open = !open"
+						class="w-full px-3 py-2 text-left border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+					>
+						<span x-text="getDateDisplayText()"></span>
+						<svg class="w-5 h-5 float-right mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+						</svg>
+					</button>
+					<div 
+						x-show="open" 
+						@click.away="open = false"
+						x-transition
+						class="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto"
+					>
+						<template x-for="option in dateOptions">
+							<div 
+								@click="$event.stopPropagation(); if (filters.dateMulti.includes(option)) { filters.dateMulti = filters.dateMulti.filter(d => d !== option); } else { filters.dateMulti.push(option); } applyFilters();"
+								class="cursor-pointer select-none relative py-2 pl-3 pr-9 hover:bg-gray-50"
+							>
+								<div class="flex items-center">
+									<input 
+										type="checkbox" 
+										x-bind:checked="filters.dateMulti.includes(option)"
+										class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded mr-3"
+										readonly
+									/>
+									<span class="block truncate font-normal capitalize" x-text="option === 'today' ? 'Today' : option === 'week' ? 'This Week' : 'This Month'"></span>
+								</div>
+							</div>
+						</template>
+					</div>
+				</div>
+			</div>
+			
+			<!-- Clear Filters -->
+			<div class="flex items-end">
+				<button 
+					@click="clearFilters()"
+					class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+				>
+					Clear Filters
+				</button>
+			</div>
+		</div>
+	</div>
+} 

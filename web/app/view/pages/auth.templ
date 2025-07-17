@@ -1,12 +1,13 @@
 package pages
 
 import (
-	"main/web/app/view"
+	"main/web/app/types"
+	"main/web/app/view" 
 	"main/web/app/view/components"
 )
 
-templ Auth() {
-    @view.Index() {
+templ Auth(webconfig types.WebConfig) {
+    @view.Index(webconfig) {
         @components.Navigation()
         
         <main class="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -14,8 +15,6 @@ templ Auth() {
                 @AuthCard()
             </div>
         </main>
-        
-        @components.Footer()
     }
 }
 
@@ -23,13 +22,11 @@ templ AuthCard() {
     <div class="bg-white rounded-xl shadow-lg p-8" x-data="{ activeTab: 'login' }">
         <!-- Logo and Header -->
         <div class="text-center mb-8">
-            <div class="w-16 h-16 mx-auto rounded-lg flex items-center justify-center shadow-md mb-4" style="background: linear-gradient(135deg, #f4cc1d 0%, #e6b800 100%);">
-                <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 24 24" style="color: #000755;">
-                    <path d="M19.14,12.94c0.04-0.3,0.06-0.61,0.06-0.94c0-0.32-0.02-0.64-0.07-0.94l2.03-1.58c0.18-0.14,0.23-0.41,0.12-0.61 l-1.92-3.32c-0.12-0.22-0.37-0.29-0.59-0.22l-2.39,0.96c-0.5-0.38-1.03-0.7-1.62-0.94L14.4,2.81c-0.04-0.24-0.24-0.41-0.48-0.41 h-3.84c-0.24,0-0.43,0.17-0.47,0.41L9.25,5.35C8.66,5.59,8.12,5.92,7.63,6.29L5.24,5.33c-0.22-0.08-0.47,0-0.59,0.22L2.74,8.87 C2.62,9.08,2.66,9.34,2.86,9.48l2.03,1.58C4.84,11.36,4.82,11.69,4.82,12s0.02,0.64,0.07,0.94l-2.03,1.58 c-0.18,0.14-0.23,0.41-0.12,0.61l1.92,3.32c0.12,0.22,0.37,0.29,0.59,0.22l2.39-0.96c0.5,0.38,1.03,0.7,1.62,0.94l0.36,2.54 c0.05,0.24,0.24,0.41,0.48,0.41h3.84c0.24,0,0.43-0.17,0.47-0.41l0.36-2.54c0.59-0.24,1.13-0.56,1.62-0.94l2.39,0.96 c0.22,0.08,0.47,0,0.59-0.22l1.92-3.32c0.12-0.22,0.07-0.47-0.12-0.61L19.14,12.94z M12,15.6c-1.98,0-3.6-1.62-3.6-3.6 s1.62-3.6,3.6-3.6s3.6,1.62,3.6,3.6S13.98,15.6,12,15.6z"/>
-                </svg>
+            <div class="w-20 h-20 mx-auto rounded-2xl flex items-center justify-center shadow-xl mb-6 overflow-hidden transition-transform duration-200 hover:scale-105" style="background: linear-gradient(135deg, #f4cc1d 0%, #e6b800 100%); border: 3px solid rgba(0, 7, 85, 0.1);">
+                <img src="/assets/images/logo.png" alt="Alfashop Logo" class="w-16 h-16 object-contain filter drop-shadow-md" />
             </div>
-            <h2 class="text-3xl font-bold" style="color: #000755;">Welcome to Alfashop</h2>
-            <p class="text-gray-600 mt-2">Your trusted auto parts partner</p>
+            <h2 class="text-3xl font-bold tracking-tight" style="color: #000755;">Welcome to Alfashop</h2>
+            <p class="text-gray-600 mt-2 font-medium">Your trusted exclusive auto parts partner</p>
         </div>
 
         <!-- Tab Navigation -->
@@ -54,42 +51,42 @@ templ AuthCard() {
 
         <!-- Login Form -->
         <div x-show="activeTab === 'login'" x-transition class="space-y-6">
-            <form class="space-y-4" @submit.prevent="handleLogin">
+            <form 
+                hx-post="/auth/login" 
+                hx-target="#login-messages" 
+                hx-swap="innerHTML"
+                class="space-y-6"
+            >
                 <div>
-                    <label for="login-email" class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                    <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
                     <input 
+                        id="email" 
+                        name="Email" 
                         type="email" 
-                        id="login-email" 
-                        name="email" 
-                        required
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm form-input focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                        placeholder="Enter your email"
+                        required 
+                        class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
                     />
                 </div>
                 
                 <div>
-                    <label for="login-password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                    <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
                     <input 
+                        id="password" 
+                        name="Password" 
                         type="password" 
-                        id="login-password" 
-                        name="password" 
-                        required
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm form-input focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                        placeholder="Enter your password"
+                        required 
+                        class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
                     />
                 </div>
                 
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center">
-                        <input 
-                            type="checkbox" 
-                            id="remember-me" 
-                            class="h-4 w-4 rounded border-gray-300 focus:ring-yellow-500"
-                            style="accent-color: #f4cc1d;"
-                        />
-                        <label for="remember-me" class="ml-2 block text-sm text-gray-700">Remember me</label>
-                    </div>
-                    <a href="#" class="text-sm hover:underline" style="color: #000755;">Forgot password?</a>
+                <div class="flex items-center">
+                    <input 
+                        id="remember-me" 
+                        name="Remember" 
+                        type="checkbox" 
+                        class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    />
+                    <label for="remember-me" class="ml-2 block text-sm text-gray-900">Remember me</label>
                 </div>
                 
                 <button 
@@ -104,47 +101,43 @@ templ AuthCard() {
 
         <!-- Register Form -->
         <div x-show="activeTab === 'register'" x-transition class="space-y-6">
-            <form class="space-y-4" @submit.prevent="handleRegister" x-data="{ password: '', confirmPassword: '' }">
+            <form 
+                hx-post="/auth/register" 
+                hx-target="#register-messages" 
+                hx-swap="innerHTML"
+                class="space-y-6"
+            >
                 <div>
-                    <label for="reg-email" class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                    <label for="register-email" class="block text-sm font-medium text-gray-700">Email</label>
                     <input 
+                        id="register-email" 
+                        name="Email" 
                         type="email" 
-                        id="reg-email" 
-                        name="email" 
-                        required
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm form-input focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                        placeholder="Enter your email"
+                        required 
+                        class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
                     />
                 </div>
                 
                 <div>
-                    <label for="reg-password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                    <label for="register-password" class="block text-sm font-medium text-gray-700">Password</label>
                     <input 
+                        id="register-password" 
+                        name="Password" 
                         type="password" 
-                        id="reg-password" 
-                        name="password" 
-                        required
-                        x-model="password"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm form-input focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                        placeholder="Create a password"
+                        required 
+                        class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
                     />
                 </div>
                 
                 <div>
-                    <label for="confirm-password" class="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
+                    <label for="confirm-password" class="block text-sm font-medium text-gray-700">Confirm Password</label>
                     <input 
-                        type="password" 
                         id="confirm-password" 
-                        name="confirm_password" 
-                        required
-                        x-model="confirmPassword"
-                        :class="password && confirmPassword && password !== confirmPassword ? 'border-red-500' : ''"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm form-input focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
-                        placeholder="Confirm your password"
+                        name="ConfirmPassword" 
+                        type="password" 
+                        required 
+                        class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-sm shadow-sm placeholder-gray-400 focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500"
                     />
-                    <p x-show="password && confirmPassword && password !== confirmPassword" class="text-red-500 text-xs mt-1">
-                        Passwords do not match
-                    </p>
                 </div>
                 
                 <div class="flex items-center">
@@ -182,16 +175,38 @@ templ AuthCard() {
 
     <!-- Alpine.js Functions -->
     <script>
-        function handleLogin() {
-            console.log('Login submitted');
-            // Add login logic here
-            alert('Login functionality will be implemented');
+        function handleLogin(event) {
+            const formData = new FormData(event.target);
+            const email = formData.get('email');
+            const password = formData.get('password');
+            const rememberMe = formData.get('remember') === 'on';
+            
+            if (!email || !password) {
+                alert('Please fill in all fields');
+                return;
+            }
+            
+            Alpine.store('auth').login({ email, password, rememberMe });
         }
 
-        function handleRegister() {
-            console.log('Register submitted');
-            // Add registration logic here
-            alert('Registration functionality will be implemented');
+        function handleRegister(event) {
+            const formData = new FormData(event.target);
+            const email = formData.get('email');
+            const password = formData.get('password');
+            const confirmPassword = formData.get('confirm_password');
+            
+            if (!email || !password || !confirmPassword) {
+                alert('Please fill in all fields');
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                alert('Passwords do not match!');
+                return;
+            }
+            
+            console.log('Registration attempt:', { email, password });
+            alert('Registration successful! Please login with your credentials.');
         }
     </script>
 }

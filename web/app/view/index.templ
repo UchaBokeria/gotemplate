@@ -1,14 +1,21 @@
 package view
 
-templ Index() {
+import (
+	"main/web/app/types"
+	"main/web/app/view/components"
+)
+
+templ Index(webconfig types.WebConfig) {
 	<!DOCTYPE html>
-	<html lang="ka" d="a">
+	<html lang={webconfig.Language} d="a">
 		<head>
 			@Meta()
 			@Imports()
 		</head>
 		<body>
 			{ children... }
+			@components.Footer(webconfig)
+			@components.CartWidget()
 		</body>
 	</html>
 }

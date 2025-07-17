@@ -1,0 +1,165 @@
+package pages
+
+import (
+	"main/web/app/types"
+	"main/web/app/view"
+	"main/web/app/view/components"
+)
+
+templ Landing(webconfig types.WebConfig) {
+    @view.Index(webconfig) {
+        @components.Navigation()
+        
+        <main class="min-h-screen bg-gray-50">
+            <!-- Hero Section -->
+            @HeroSection()
+            
+            <!-- Product Catalogs Section -->
+            <div class="py-12">
+                @CatalogSection("Air Filters", "Engine and cabin air filters for all vehicle makes")
+                @CatalogSection("Oil Filters", "Premium oil filters for optimal engine protection")
+                @CatalogSection("Fuel Filters", "High-quality fuel filters for clean fuel delivery")
+                @CatalogSection("Brake Parts", "Brake pads, rotors, and complete brake systems")
+            </div>
+            
+            <!-- Features Section -->
+            @FeaturesSection()
+        </main>
+    }
+}
+
+templ HeroSection() {
+    <section class="bg-gradient-to-r from-blue-900 via-blue-800 to-blue-900 text-white py-20 relative overflow-hidden" style="background: linear-gradient(135deg, #000755 0%, #1e3a8a 50%, #000755 100%);">
+        <!-- Background decoration -->
+        <div class="absolute inset-0 bg-black opacity-10"></div>
+        <div class="absolute top-0 left-0 w-full h-full">
+            <div class="absolute top-10 left-10 w-20 h-20 rounded-full animate-pulse opacity-20" style="background-color: #f4cc1d;"></div>
+            <div class="absolute bottom-10 right-10 w-32 h-32 rounded-full animate-pulse delay-1000 opacity-10" style="background-color: #f4cc1d;"></div>
+            <div class="absolute top-1/2 left-1/4 w-16 h-16 rounded-full animate-pulse delay-500 opacity-20" style="background-color: #f4cc1d;"></div>
+        </div>
+        
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="text-center">
+                <h1 class="text-4xl md:text-6xl font-bold mb-6 animate-fade-in-up">
+                    Premium Auto Parts & Filters
+                </h1>
+                <p class="text-xl md:text-2xl mb-8 opacity-90 animate-fade-in-up delay-200">
+                    Exclusive importer of world-class automotive parts from leading international brands
+                </p>
+                <div class="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in-up delay-400">
+                    <a href="/products" class="inline-block text-blue-900 px-8 py-4 rounded-lg font-semibold text-lg hover:bg-yellow-400 transition-all duration-300 hover:scale-105 shadow-lg hover:shadow-xl" style="background-color: #f4cc1d; color: #000755;">
+                        Browse Auto Parts
+                    </a>
+                    <a href="/register" class="inline-block bg-transparent border-2 text-white px-8 py-4 rounded-lg font-semibold text-lg hover:text-blue-900 transition-all duration-300 hover:scale-105" style="border-color: #f4cc1d; hover:background-color: #f4cc1d;">
+                        Create Account
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+}
+
+templ CatalogSection(title, description string) {
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16">
+        <div class="text-center mb-8">
+            <h2 class="text-3xl font-bold mb-4" style="color: #000755;">{ title }</h2>
+            <p class="text-lg text-gray-600">{ description }</p>
+        </div>
+        
+        <!-- Product Carousel Placeholder -->
+        <div class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow duration-300">
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                if title == "Air Filters" {
+                    @ProductCard("Engine Air Filter", "$24.99", "/images/air-filter.jpg")
+                    @ProductCard("Cabin Air Filter", "$19.99", "/images/cabin-filter.jpg")
+                    @ProductCard("Performance Air Filter", "$39.99", "/images/performance-filter.jpg")
+                    @ProductCard("Heavy Duty Air Filter", "$34.99", "/images/heavy-duty-filter.jpg")
+                    @ProductCard("Premium Air Filter", "$29.99", "/images/premium-filter.jpg")
+                    @ProductCard("Racing Air Filter", "$49.99", "/images/racing-filter.jpg")
+                } else if title == "Oil Filters" {
+                    @ProductCard("Standard Oil Filter", "$12.99", "/images/oil-filter.jpg")
+                    @ProductCard("Synthetic Oil Filter", "$18.99", "/images/synthetic-filter.jpg")
+                    @ProductCard("High Flow Oil Filter", "$22.99", "/images/high-flow-filter.jpg")
+                    @ProductCard("Extended Life Filter", "$16.99", "/images/extended-filter.jpg")
+                    @ProductCard("Performance Oil Filter", "$24.99", "/images/performance-oil.jpg")
+                    @ProductCard("Premium Oil Filter", "$19.99", "/images/premium-oil.jpg")
+                } else if title == "Fuel Filters" {
+                    @ProductCard("Inline Fuel Filter", "$15.99", "/images/inline-fuel.jpg")
+                    @ProductCard("Fuel Pump Filter", "$28.99", "/images/fuel-pump.jpg")
+                    @ProductCard("Diesel Fuel Filter", "$32.99", "/images/diesel-filter.jpg")
+                    @ProductCard("High Pressure Filter", "$24.99", "/images/high-pressure.jpg")
+                    @ProductCard("Water Separator", "$39.99", "/images/water-separator.jpg")
+                    @ProductCard("Fuel System Filter", "$21.99", "/images/fuel-system.jpg")
+                } else {
+                    @ProductCard("Brake Pads Set", "$89.99", "/images/brake-pads.jpg")
+                    @ProductCard("Brake Rotors Pair", "$129.99", "/images/brake-rotors.jpg")
+                    @ProductCard("Brake Fluid", "$14.99", "/images/brake-fluid.jpg")
+                    @ProductCard("Brake Caliper", "$159.99", "/images/brake-caliper.jpg")
+                    @ProductCard("Brake Lines", "$45.99", "/images/brake-lines.jpg")
+                    @ProductCard("Brake Master Cylinder", "$199.99", "/images/master-cylinder.jpg")
+                }
+            </div>
+            
+            <div class="text-center mt-6">
+                <a href="/products" class="inline-block text-blue-900 px-6 py-3 rounded-lg font-semibold hover:bg-yellow-400 transition-all duration-300 hover:scale-105 shadow-md hover:shadow-lg" style="background-color: #f4cc1d; color: #000755;">
+                    View All { title }
+                </a>
+            </div>
+        </div>
+    </div>
+}
+
+templ ProductCard(name, price, image string) {
+    <div class="bg-gray-50 rounded-lg p-4 hover:shadow-lg transition-all duration-300 cursor-pointer group hover:scale-105">
+        <div class="aspect-square bg-white rounded-md mb-3 overflow-hidden shadow-inner">
+            <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 group-hover:from-gray-200 group-hover:to-gray-300 transition-all duration-300">
+                <svg class="w-12 h-12 text-gray-400 group-hover:text-gray-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 7.172V5L8 4z"/>
+                </svg>
+            </div>
+        </div>
+        <h3 class="font-semibold text-sm text-gray-900 mb-1 line-clamp-2 group-hover:text-blue-900 transition-colors" style="group-hover:color: #000755;">{ name }</h3>
+        <p class="font-bold group-hover:text-yellow-600" style="color: #f4cc1d;">{ price }</p>
+    </div>
+}
+
+templ FeaturesSection() {
+    <section class="bg-white py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold mb-4" style="color: #000755;">Why Choose Alfashop?</h2>
+                <p class="text-lg text-gray-600">Your exclusive partner for premium automotive parts with unmatched brand partnerships</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                @FeatureCard(
+                    "Exclusive Brand Partnerships",
+                    "Direct partnerships with world-leading automotive manufacturers ensuring authentic premium parts and competitive pricing",
+                    "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z",
+                )
+                @FeatureCard(
+                    "Import Excellence",
+                    "Specialized import operations with comprehensive logistics ensuring fast, reliable delivery nationwide",
+                    "M13 10V3L4 14h7v7l9-11h-7z",
+                )
+                @FeatureCard(
+                    "Industry Expertise",
+                    "28+ years of automotive import experience with dedicated specialists for technical support and product guidance",
+                    "M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192L5.636 18.364M12 12h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z",
+                )
+            </div>
+        </div>
+    </section>
+}
+
+templ FeatureCard(title, description, iconPath string) {
+    <div class="text-center p-6 group hover:bg-gray-50 rounded-xl transition-all duration-300 hover:scale-105">
+        <div class="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 group-hover:shadow-lg transition-all duration-300" style="background: linear-gradient(135deg, #f4cc1d 0%, #e6b800 100%);">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: #000755;">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={ iconPath }/>
+            </svg>
+        </div>
+        <h3 class="text-xl font-semibold mb-2 group-hover:text-blue-900 transition-colors" style="color: #000755;">{ title }</h3>
+        <p class="text-gray-600 group-hover:text-gray-700 transition-colors">{ description }</p>
+    </div>
+}

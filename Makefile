@@ -39,7 +39,7 @@ build:
 # Database Migration-Seeding-Parsing Commands
 .PHONY: migrate
 migrate:
-	go run ./cmd/databases/postgres/migrate/main.go
+	go run ./cmd/databases/postgres/migration/main.go
 
 .PHONY: drop
 drop:

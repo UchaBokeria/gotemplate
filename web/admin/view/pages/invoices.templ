@@ -1,0 +1,294 @@
+package pages
+
+import (
+	"main/web/admin/view"
+	"main/web/admin/view/ui"
+)
+
+templ Invoices() {
+	@view.AdminLayout() {
+		<script>
+			const invoicesConfig = {
+				filters: {
+					search: '',
+					orderId: '',
+					statusMulti: []
+				},
+				pagination: {
+					currentPage: 1,
+					pageSize: 20,
+					totalPages: 1,
+					totalItems: 0
+				},
+				showConfirmDialog: false,
+				showViewDialog: false,
+				itemToDelete: null,
+				viewingItem: null,
+
+				applyFilters() {
+					const params = new URLSearchParams();
+					if (this.filters.search) params.append('search', this.filters.search);
+					if (this.filters.orderId) params.append('orderId', this.filters.orderId);
+					if (this.filters.statusMulti.length) {
+						this.filters.statusMulti.forEach(status => params.append('statusMulti', status));
+					}
+					
+					params.append('page', this.pagination.currentPage);
+					params.append('pageSize', this.pagination.pageSize);
+					
+					htmx.ajax('GET', `/admin/invoices/list?${params.toString()}`, {
+						target: '#invoices-table-container',
+						swap: 'innerHTML'
+					});
+				},
+
+				clearFilters() {
+					this.filters = {
+						search: '',
+						orderId: '',
+						statusMulti: []
+					};
+					this.pagination.currentPage = 1;
+					this.applyFilters();
+				},
+
+				goToPage(page) {
+					if (page >= 1 && page <= this.pagination.totalPages) {
+						this.pagination.currentPage = page;
+						this.applyFilters();
+					}
+				},
+
+				previousPage() {
+					this.goToPage(this.pagination.currentPage - 1);
+				},
+
+				nextPage() {
+					this.goToPage(this.pagination.currentPage + 1);
+				},
+
+				deleteItem(item) {
+					this.itemToDelete = item;
+					this.showConfirmDialog = true;
+				},
+
+				confirmAction() {
+					if (this.itemToDelete) {
+						htmx.ajax('DELETE', `/admin/invoices/${this.itemToDelete.id}`, {
+							target: '#invoices-table-container',
+							swap: 'innerHTML'
+						});
+						this.itemToDelete = null;
+					}
+				},
+
+				viewItem(item) {
+					this.viewingItem = item;
+					this.showViewDialog = true;
+				},
+
+				getStatusColor(status) {
+					const colors = {
+						'pending': 'bg-yellow-100 text-yellow-800',
+						'paid': 'bg-green-100 text-green-800',
+						'overdue': 'bg-red-100 text-red-800',
+						'cancelled': 'bg-gray-100 text-gray-800'
+					};
+					return colors[status] || 'bg-gray-100 text-gray-800';
+				}
+			}
+		</script>
+
+		<div x-data="invoicesConfig">
+			<div class="mb-6 flex justify-between items-center">
+				<h2 class="text-2xl font-bold text-gray-900">Invoices Management</h2>
+			</div>
+			@InvoicesFilters()
+			
+			<!-- Invoices Table Container -->
+			<div 
+				hx-get="/admin/invoices/list"
+				hx-trigger="load"
+				hx-target="#invoices-table-container"
+				hx-swap="innerHTML"
+				id="invoices-table-container"
+				class="overflow-hidden"
+			>
+				<!-- Loading state -->
+				<div class="bg-white rounded-lg shadow p-8 text-center">
+					<div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+					<p class="mt-4 text-gray-600">Loading invoices...</p>
+				</div>
+			</div>
+			
+			<!-- Pagination -->
+			@ui.Pagination()
+			
+			@InvoiceViewDialog()
+			@ui.ConfirmDialog("Delete Invoice", "Are you sure you want to delete this invoice? This action cannot be undone.")
+		</div>
+	}
+}
+
+templ InvoicesFilters() {
+	<div class="mb-6 bg-white p-4 rounded-lg shadow">
+		<div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+			<!-- Search -->
+			<div>
+				<label for="search" class="block text-sm font-medium text-gray-700 mb-1">Search</label>
+				<input 
+					type="text" 
+					id="search"
+					x-model="filters.search"
+					@input="applyFilters()"
+					placeholder="Search invoices, customers..."
+					class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+				/>
+			</div>
+			
+			<!-- Order ID Filter -->
+			<div>
+				<label for="orderId" class="block text-sm font-medium text-gray-700 mb-1">Order ID</label>
+				<input 
+					type="text" 
+					id="orderId"
+					x-model="filters.orderId"
+					@input="applyFilters()"
+					placeholder="Group by order..."
+					class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+				/>
+			</div>
+			
+			<!-- Status Filter -->
+			<div x-data="{ open: false, statusOptions: ['pending', 'paid', 'overdue', 'cancelled'], getStatusDisplayText() { return filters.statusMulti && filters.statusMulti.length > 0 ? (filters.statusMulti.length === 1 ? filters.statusMulti[0].charAt(0).toUpperCase() + filters.statusMulti[0].slice(1) : filters.statusMulti.length + ' selected') : 'All Statuses'; } }" 
+				 x-init="if (!filters.statusMulti) filters.statusMulti = []">
+				<label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+				<div class="relative">
+					<button 
+						@click="open = !open"
+						class="w-full px-3 py-2 text-left border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+					>
+						<span x-text="getStatusDisplayText()"></span>
+						<svg class="w-5 h-5 float-right mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+						</svg>
+					</button>
+					<div 
+						x-show="open" 
+						@click.away="open = false"
+						x-transition
+						class="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-auto"
+					>
+						<template x-for="option in statusOptions">
+							<div 
+								@click="$event.stopPropagation(); if (filters.statusMulti.includes(option)) { filters.statusMulti = filters.statusMulti.filter(s => s !== option); } else { filters.statusMulti.push(option); } applyFilters();"
+								class="cursor-pointer select-none relative py-2 pl-3 pr-9 hover:bg-gray-50"
+							>
+								<div class="flex items-center">
+									<input 
+										type="checkbox" 
+										x-bind:checked="filters.statusMulti.includes(option)"
+										class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded mr-3"
+										readonly
+									/>
+									<span class="block truncate font-normal capitalize" x-text="option"></span>
+								</div>
+							</div>
+						</template>
+					</div>
+				</div>
+			</div>
+			
+			<!-- Clear Filters -->
+			<div class="flex items-end">
+				<button 
+					@click="clearFilters()"
+					class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+				>
+					Clear Filters
+				</button>
+			</div>
+		</div>
+	</div>
+}
+
+templ InvoiceViewDialog() {
+	<div 
+		x-show="showViewDialog" 
+		@click.away="showViewDialog = false"
+		x-transition:enter="ease-out duration-300"
+		x-transition:enter-start="opacity-0 scale-95"
+		x-transition:enter-end="opacity-100 scale-100"
+		x-transition:leave="ease-in duration-200"
+		x-transition:leave-start="opacity-100 scale-100"
+		x-transition:leave-end="opacity-0 scale-95"
+		class="fixed inset-0 z-50 overflow-y-auto"
+		style="display: none;"
+	>
+		<div class="flex items-center justify-center min-h-screen px-4">
+			<div class="fixed inset-0 bg-black opacity-50"></div>
+			<div class="bg-white rounded-lg shadow-xl max-w-lg w-full p-6 relative z-10">
+				<div class="flex justify-between items-center mb-4">
+					<h3 class="text-lg font-semibold text-gray-900">Invoice Details</h3>
+					<button @click="showViewDialog = false" class="text-gray-400 hover:text-gray-600">
+						<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+						</svg>
+					</button>
+				</div>
+				
+				<template x-if="viewingItem">
+					<div class="space-y-4">
+						<div class="grid grid-cols-2 gap-4">
+							<div>
+								<label class="block text-sm font-medium text-gray-700">Invoice ID</label>
+								<p class="mt-1 text-sm text-gray-900" x-text="viewingItem.id"></p>
+							</div>
+							<div>
+								<label class="block text-sm font-medium text-gray-700">Order ID</label>
+								<p class="mt-1 text-sm text-gray-900" x-text="viewingItem.orderId"></p>
+							</div>
+							<div>
+								<label class="block text-sm font-medium text-gray-700">Customer</label>
+								<p class="mt-1 text-sm text-gray-900" x-text="viewingItem.customer"></p>
+							</div>
+							<div>
+								<label class="block text-sm font-medium text-gray-700">Email</label>
+								<p class="mt-1 text-sm text-gray-900" x-text="viewingItem.email"></p>
+							</div>
+							<div>
+								<label class="block text-sm font-medium text-gray-700">Amount</label>
+								<p class="mt-1 text-sm text-gray-900" x-text="'$' + viewingItem.amount.toFixed(2)"></p>
+							</div>
+							<div>
+								<label class="block text-sm font-medium text-gray-700">Status</label>
+								<span 
+									x-bind:class="getStatusColor(viewingItem.status)"
+									class="inline-flex px-2 py-1 text-xs font-semibold rounded-full mt-1"
+									x-text="viewingItem.status"
+								></span>
+							</div>
+							<div>
+								<label class="block text-sm font-medium text-gray-700">Date</label>
+								<p class="mt-1 text-sm text-gray-900" x-text="viewingItem.date"></p>
+							</div>
+							<div>
+								<label class="block text-sm font-medium text-gray-700">Due Date</label>
+								<p class="mt-1 text-sm text-gray-900" x-text="viewingItem.dueDate"></p>
+							</div>
+						</div>
+					</div>
+				</template>
+				
+				<div class="mt-6 flex justify-end">
+					<button 
+						@click="showViewDialog = false"
+						class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500"
+					>
+						Close
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+} 

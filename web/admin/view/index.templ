@@ -1,0 +1,106 @@
+package view
+
+import (
+	"main/web/admin/view/components"
+)
+
+templ Index() {
+	<!DOCTYPE html>
+	<html lang="en">
+	<head>
+		<meta charset="UTF-8"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<title>Admin Panel - Alfashop</title>
+		<script src="https://cdn.tailwindcss.com"></script>
+		<script src="https://unpkg.com/htmx.org@1.9.10"></script>
+		<script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+		<link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico"/>
+		<style>
+			[x-cloak] { display: none !important; }
+		</style>
+	</head>
+	<body class="bg-gray-50">
+		{ children... }
+	</body>
+	</html>
+}
+
+templ AdminLayout() {
+	@Index() {
+		<div class="flex h-screen bg-gray-50" x-data="adminStore()">
+			@components.Sidebar()
+			<div class="flex-1 flex flex-col overflow-hidden">
+				@components.TopBar()
+				<main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-6 min-h-0">
+					{ children... }
+				</main>
+			</div>
+		</div>
+
+		<script>
+			document.addEventListener('alpine:init', () => {
+				Alpine.store('admin', {
+					sidebarOpen: true,
+					currentPage: window.location.pathname.split('/').pop() || 'dashboard',
+					
+					toggleSidebar() {
+						this.sidebarOpen = !this.sidebarOpen;
+					},
+					
+					showToast(message, type = 'success') {
+						Alpine.store('toast').show(message, type);
+					}
+				});
+				
+			});
+
+			function adminStore() {
+				return {
+					logout() {
+						if (confirm('Are you sure you want to logout?')) {
+							window.location.href = '/';
+						}
+					}
+				}
+			}
+
+			function multiSelectFilter(options) {
+				return {
+					open: false,
+					selectedValues: [],
+					options: options,
+					
+					toggleOption(event, value) {
+						event.stopPropagation();
+						const index = this.selectedValues.indexOf(value);
+						if (index > -1) {
+							this.selectedValues.splice(index, 1);
+						} else {
+							this.selectedValues.push(value);
+						}
+						this.$nextTick(() => {
+							if (typeof this.applyFilters === 'function') {
+								this.applyFilters();
+							}
+						});
+					},
+					
+					getDisplayText() {
+						if (this.selectedValues.length === 0) {
+							if (this.options.includes('today') || this.options.includes('week')) {
+								return 'All Time';
+							} else {
+								return 'All Statuses';
+							}
+						} else if (this.selectedValues.length === 1) {
+							return this.selectedValues[0].charAt(0).toUpperCase() + this.selectedValues[0].slice(1);
+						} else {
+							return `${this.selectedValues.length} selected`;
+						}
+					}
+				}
+			}
+			
+		</script>
+	}
+}

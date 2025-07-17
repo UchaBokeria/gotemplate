@@ -1,0 +1,362 @@
+package pages
+
+import (
+	"main/web/app/types"
+	"main/web/app/view"
+	"main/web/app/view/components" 
+)
+
+templ Checkout(webconfig types.WebConfig) {
+    @view.Index(webconfig) {
+        @components.Navigation()
+        
+        <main class="min-h-screen bg-gray-50 py-8" x-data="checkoutStore()">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <!-- Page Header -->
+                <div class="mb-8">
+                    <h1 class="text-3xl font-bold mb-2" style="color: #000755;">Checkout</h1>
+                    <nav class="flex text-sm text-gray-600">
+                        <a href="/" class="hover:text-blue-900" style="hover:color: #000755;">Home</a>
+                        <span class="mx-2">/</span>
+                        <a href="/products" class="hover:text-blue-900" style="hover:color: #000755;">Products</a>
+                        <span class="mx-2">/</span>
+                        <span style="color: #000755;">Checkout</span>
+                    </nav>
+                </div>
+
+                <!-- Checkout Content -->
+                <div class="lg:grid lg:grid-cols-12 lg:gap-12">
+                    <!-- Order Summary -->
+                    <div class="lg:col-span-7">
+                        @OrderSummary()
+                    </div>
+
+                    <!-- Payment Information -->
+                    <div class="lg:col-span-5 mt-8 lg:mt-0">
+                        @PaymentInvoice()
+                    </div>
+                </div>
+            </div>
+        </main>
+    }
+}
+
+templ OrderSummary() {
+    <div class="bg-white rounded-2xl shadow-lg p-8">
+        <h2 class="text-2xl font-bold mb-6" style="color: #000755;">Order Summary</h2>
+        
+        <!-- Empty Cart Message -->
+        <div x-show="cartItems.length === 0" class="text-center py-12">
+            <svg class="w-24 h-24 mx-auto text-gray-300 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.5 6M7 13l-1.5-6m0 0L3 3M7 13h10M17 21a2 2 0 100-4 2 2 0 000 4zM9 21a2 2 0 100-4 2 2 0 000 4z"/>
+            </svg>
+            <h3 class="text-xl font-semibold text-gray-600 mb-2">Your cart is empty</h3>
+            <p class="text-gray-500 mb-6">Add some premium auto parts to continue</p>
+            <a href="/products" class="inline-block py-3 px-6 text-blue-900 font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105" style="background-color: #f4cc1d; color: #000755;">
+                Browse Products
+            </a>
+        </div>
+
+        <!-- Cart Items -->
+        <div x-show="cartItems.length > 0" class="space-y-6">
+            <template x-for="item in cartItems" :key="item.id">
+                <div class="flex items-center space-x-4 p-4 bg-gray-50 rounded-xl">
+                    <!-- Product Image -->
+                    <div class="w-20 h-20 bg-gradient-to-br from-gray-200 to-gray-300 rounded-lg flex items-center justify-center flex-shrink-0">
+                        <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 7.172V5L8 4z"/>
+                        </svg>
+                    </div>
+                    
+                    <!-- Product Details -->
+                    <div class="flex-1">
+                        <h3 class="font-semibold text-gray-900" x-text="item.name"></h3>
+                        <p class="text-sm text-gray-600">Premium quality imported part</p>
+                        <div class="flex items-center justify-between mt-2">
+                            <div class="flex items-center space-x-4">
+                                <span class="text-sm text-gray-500">Quantity:</span>
+                                <div class="flex items-center space-x-2">
+                                    <button @click="updateQuantity(item.id, item.quantity - 1)" class="w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition-colors">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
+                                        </svg>
+                                    </button>
+                                    <span class="w-8 text-center font-medium" x-text="item.quantity"></span>
+                                    <button @click="updateQuantity(item.id, item.quantity + 1)" class="w-8 h-8 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition-colors">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-lg font-bold" style="color: #f4cc1d;" x-text="'$' + (item.price * item.quantity).toFixed(2)"></p>
+                                <p class="text-sm text-gray-500" x-text="'$' + item.price + ' each'"></p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Remove Button -->
+                    <button @click="removeItem(item.id)" class="text-red-400 hover:text-red-600 transition-colors p-2 rounded-full hover:bg-red-50" title="Remove item">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                        </svg>
+                    </button>
+                </div>
+            </template>
+
+            <!-- Order Totals -->
+            <div class="border-t pt-6 space-y-3">
+                <div class="flex justify-between text-gray-600">
+                    <span>Subtotal:</span>
+                    <span x-text="'$' + subtotal.toFixed(2)"></span>
+                </div>
+                <div class="flex justify-between text-gray-600">
+                    <span>Shipping:</span>
+                    <span>Free</span>
+                </div>
+                <div class="flex justify-between text-gray-600">
+                    <span>Tax (VAT 18%):</span>
+                    <span x-text="'$' + tax.toFixed(2)"></span>
+                </div>
+                <div class="border-t pt-3 flex justify-between text-xl font-bold" style="color: #000755;">
+                    <span>Total:</span>
+                    <span x-text="'$' + total.toFixed(2)" style="color: #f4cc1d;"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+templ PaymentInvoice() {
+    <div class="bg-white rounded-2xl shadow-lg p-8">
+        <!-- Invoice Header -->
+        <div class="border-b pb-6 mb-6">
+            <div class="flex items-center space-x-3 mb-4">
+                <div class="w-16 h-16 rounded-xl flex items-center justify-center shadow-lg overflow-hidden" style="background: linear-gradient(135deg, #f4cc1d 0%, #e6b800 100%); border: 2px solid rgba(0, 7, 85, 0.1);">
+                    <img src="/assets/images/logo.png" alt="Alfashop Logo" class="w-12 h-12 object-contain filter drop-shadow-sm" />
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold tracking-tight" style="color: #000755;">Alfashop</h2>
+                    <p class="text-sm text-gray-600 font-medium uppercase tracking-wider">Auto Parts & Filters</p>
+                </div>
+            </div>
+            <h3 class="text-xl font-semibold" style="color: #000755;">Payment Invoice</h3>
+            <p class="text-gray-600">Please complete your payment using the details below</p>
+        </div>
+
+        <!-- Company Information -->
+        <div class="mb-8">
+            <h4 class="font-semibold mb-3" style="color: #000755;">Company Details</h4>
+            <div class="space-y-2 text-sm text-gray-600">
+                <p><strong>Alfashop Ltd.</strong></p>
+                <p>Exclusive Auto Parts Importer</p>
+                <p>1234 Industrial Avenue</p>
+                <p>Automotive District, AD 12345</p>
+                <p>Tax ID: GE123456789</p>
+                <p>Phone: +995 32 123 4567</p>
+                <p>Email: orders@alfashop.com</p>
+            </div>
+        </div>
+
+        <!-- Payment Information -->
+        <div class="mb-8 p-6 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border-2" style="border-color: #000755;">
+            <h4 class="font-bold text-lg mb-4" style="color: #000755;">Bank Transfer Details</h4>
+            
+            <div class="space-y-4">
+                <div class="grid grid-cols-3 gap-4">
+                    <div class="col-span-1">
+                        <p class="text-xs font-semibold text-gray-600 uppercase tracking-wider">Bank Name</p>
+                        <p class="text-sm font-medium">Bank of Georgia</p>
+                    </div>
+                    <div class="col-span-2">
+                        <p class="text-xs font-semibold text-gray-600 uppercase tracking-wider">Account Holder</p>
+                        <p class="text-sm font-medium">Alfashop Ltd.</p>
+                    </div>
+                </div>
+                
+                <div>
+                    <p class="text-xs font-semibold text-gray-600 uppercase tracking-wider mb-1">IBAN Number</p>
+                    <div class="flex items-center space-x-2 p-3 bg-white rounded-lg border-2" style="border-color: #f4cc1d;">
+                        <code class="text-lg font-mono font-bold" style="color: #000755;">GE29NB0000000101904917</code>
+                        <button @click="copyToClipboard('GE29NB0000000101904917')" class="p-1 hover:bg-gray-100 rounded transition-colors" title="Copy IBAN">
+                            <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-xs font-semibold text-gray-600 uppercase tracking-wider">SWIFT/BIC</p>
+                        <p class="text-sm font-medium">BAGAGE22</p>
+                    </div>
+                    <div>
+                        <p class="text-xs font-semibold text-gray-600 uppercase tracking-wider">Currency</p>
+                        <p class="text-sm font-medium">USD</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment Instructions -->
+        <div class="mb-8 p-4 bg-yellow-50 rounded-xl border-l-4" style="border-color: #f4cc1d;">
+            <h4 class="font-semibold mb-2" style="color: #000755;">Payment Instructions</h4>
+            <ul class="text-sm text-gray-700 space-y-1">
+                <li>• Transfer the exact amount shown above</li>
+                <li>• Include your order number in the payment reference</li>
+                <li x-show="cartItems.length > 0">• Order Number: <strong x-text="orderNumber"></strong></li>
+                <li>• Processing takes 1-2 business days</li>
+                <li>• You'll receive email confirmation once payment is verified</li>
+            </ul>
+        </div>
+
+        <!-- Order Total Display -->
+        <div x-show="cartItems.length > 0" class="mb-8 p-6 bg-gray-50 rounded-xl">
+            <div class="space-y-2">
+                <div class="flex justify-between text-gray-600">
+                    <span>Subtotal:</span>
+                    <span x-text="'$' + subtotal.toFixed(2)"></span>
+                </div>
+                <div class="flex justify-between text-gray-600">
+                    <span>VAT (18%):</span>
+                    <span x-text="'$' + tax.toFixed(2)"></span>
+                </div>
+                <div class="border-t pt-2 flex justify-between text-xl font-bold">
+                    <span style="color: #000755;">Amount to Transfer:</span>
+                    <span x-text="'$' + total.toFixed(2)" style="color: #f4cc1d;"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Create Order Button -->
+        <div x-show="cartItems.length > 0">
+            <button 
+                @click="createOrder()"
+                :disabled="orderCreating"
+                class="w-full py-4 text-center font-bold text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                style="background-color: #f4cc1d; color: #000755;"
+            >
+                <span x-show="!orderCreating">Create Order & Generate Invoice</span>
+                <span x-show="orderCreating" class="flex items-center justify-center">
+                    <svg class="animate-spin -ml-1 mr-3 h-5 w-5" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Creating Order...
+                </span>
+            </button>
+            
+            <p class="text-xs text-gray-500 text-center mt-3">
+                By creating an order, you agree to our terms and confirm the payment details above
+            </p>
+        </div>
+
+        <!-- Empty Cart Action -->
+        <div x-show="cartItems.length === 0" class="text-center">
+            <p class="text-gray-500 mb-4">Add products to your cart to continue with checkout</p>
+            <a href="/products" class="inline-block py-3 px-6 text-blue-900 font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105" style="background-color: #f4cc1d; color: #000755;">
+                Browse Products
+            </a>
+        </div>
+    </div>
+
+    <!-- Order Success Modal -->
+    <div x-show="orderCreated" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-2xl p-8 max-w-md mx-4 text-center">
+            <div class="w-16 h-16 mx-auto rounded-full flex items-center justify-center mb-4" style="background-color: #f4cc1d;">
+                <svg class="w-8 h-8" style="color: #000755;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+            </div>
+            <h3 class="text-xl font-bold mb-2" style="color: #000755;">Order Created Successfully!</h3>
+            <p class="text-gray-600 mb-4">Your order number is: <strong x-text="orderNumber"></strong></p>
+            <p class="text-sm text-gray-500 mb-6">Please complete the bank transfer using the details above. You'll receive an email confirmation once payment is processed.</p>
+            <button @click="orderCreated = false; window.location.href = '/'" class="py-2 px-6 text-blue-900 font-semibold rounded-lg transition-colors hover:opacity-80" style="background-color: #f4cc1d; color: #000755;">
+                Continue Shopping
+            </button>
+        </div>
+    </div>
+
+    <!-- Alpine.js Store -->
+    <script>
+document.addEventListener('alpine:init', () => {
+    Alpine.data('checkoutStore', () => ({
+        orderCreating: false,
+        orderCreated: false,
+        orderNumber: '',
+
+        get cartItems() {
+            return Alpine.store('cart').items;
+        },
+
+        get subtotal() {
+            return this.cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        },
+
+        get tax() {
+            return this.subtotal * 0.18; // 18% VAT
+        },
+
+        get total() {
+            return this.subtotal + this.tax;
+        },
+
+        updateQuantity(itemId, newQuantity) {
+            Alpine.store('cart').updateQuantity(itemId, newQuantity);
+        },
+
+        removeItem(itemId) {
+            Alpine.store('cart').removeItem(itemId);
+        },
+
+        generateOrderNumber() {
+            const prefix = 'ALF';
+            const timestamp = Date.now().toString().slice(-6);
+            const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+            return `${prefix}${timestamp}${random}`;
+        },
+
+        copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                Alpine.store('cart').showNotification('IBAN copied to clipboard!');
+            });
+        },
+
+        async createOrder() {
+            if (this.cartItems.length === 0) return;
+            
+            this.orderCreating = true;
+            this.orderNumber = this.generateOrderNumber();
+            
+            // Simulate order creation API call
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
+            // Store order details (in real app, this would be sent to backend)
+            const orderData = {
+                orderNumber: this.orderNumber,
+                items: this.cartItems,
+                subtotal: this.subtotal,
+                tax: this.tax,
+                total: this.total,
+                createdAt: new Date().toISOString()
+            };
+            
+            localStorage.setItem(`order_${this.orderNumber}`, JSON.stringify(orderData));
+            
+            this.orderCreating = false;
+            this.orderCreated = true;
+            
+            // Clear cart after successful order creation
+            Alpine.store('cart').clearCart();
+        },
+
+        init() {
+            // Generate order number when component initializes
+            this.orderNumber = this.generateOrderNumber();
+        }
+    }))
+});
+</script>
+} 

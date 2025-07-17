@@ -1,20 +1,21 @@
 package pages
 
 import (
+	"main/web/app/types"
 	"main/web/app/view"
 	"main/web/app/view/components"
 )
 
-templ Products() {
-    @view.Index() {
+templ Products(webconfig types.WebConfig) {
+    @view.Index(webconfig) {
         @components.Navigation()
         
         <main class="min-h-screen bg-gray-50">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <!-- Page Header -->
                 <div class="mb-8">
-                    <h1 class="text-3xl font-bold mb-2" style="color: #000755;">Auto Parts & Filters</h1>
-                    <p class="text-gray-600">Find premium quality parts for your vehicle</p>
+                    <h1 class="text-3xl font-bold mb-2" style="color: #000755;">Premium Auto Parts & Filters</h1>
+                    <p class="text-gray-600">Exclusively imported premium automotive parts from world-leading manufacturers</p>
                 </div>
                 
                 <div class="lg:grid lg:grid-cols-4 lg:gap-8" x-data="productStore()">
@@ -27,13 +28,10 @@ templ Products() {
                     <div class="lg:col-span-3 mt-8 lg:mt-0">
                         @ProductsHeader()
                         @ProductsGrid()
-                        @Pagination()
                     </div>
                 </div>
             </div>
         </main>
-        
-        @components.Footer()
     }
 }
 
@@ -48,6 +46,7 @@ templ FilterSidebar() {
                 type="text" 
                 id="search" 
                 x-model="filters.search"
+                @input.debounce.500ms="applyFilters()"
                 placeholder="Search by part name or number..."
                 class="w-full px-3 py-2 border border-gray-300 rounded-md form-input focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
             />
@@ -56,27 +55,13 @@ templ FilterSidebar() {
         <!-- Categories -->
         <div class="mb-6">
             <h4 class="font-medium text-gray-900 mb-3">Categories</h4>
-            <div class="space-y-2">
-                <label class="flex items-center">
-                    <input type="checkbox" x-model="filters.categories" value="air-filters" class="rounded text-yellow-500 focus:ring-yellow-500" style="accent-color: #f4cc1d;" />
-                    <span class="ml-2 text-sm text-gray-700">Air Filters <span class="text-gray-500">(45)</span></span>
-                </label>
-                <label class="flex items-center">
-                    <input type="checkbox" x-model="filters.categories" value="oil-filters" class="rounded text-yellow-500 focus:ring-yellow-500" style="accent-color: #f4cc1d;" />
-                    <span class="ml-2 text-sm text-gray-700">Oil Filters <span class="text-gray-500">(38)</span></span>
-                </label>
-                <label class="flex items-center">
-                    <input type="checkbox" x-model="filters.categories" value="fuel-filters" class="rounded text-yellow-500 focus:ring-yellow-500" style="accent-color: #f4cc1d;" />
-                    <span class="ml-2 text-sm text-gray-700">Fuel Filters <span class="text-gray-500">(22)</span></span>
-                </label>
-                <label class="flex items-center">
-                    <input type="checkbox" x-model="filters.categories" value="brake-parts" class="rounded text-yellow-500 focus:ring-yellow-500" style="accent-color: #f4cc1d;" />
-                    <span class="ml-2 text-sm text-gray-700">Brake Parts <span class="text-gray-500">(67)</span></span>
-                </label>
-                <label class="flex items-center">
-                    <input type="checkbox" x-model="filters.categories" value="engine-parts" class="rounded text-yellow-500 focus:ring-yellow-500" style="accent-color: #f4cc1d;" />
-                    <span class="ml-2 text-sm text-gray-700">Engine Parts <span class="text-gray-500">(89)</span></span>
-                </label>
+            <div class="space-y-2" 
+                 hx-get="/products/categories"
+                 hx-trigger="load"
+                 hx-target="this"
+                 hx-swap="innerHTML">
+                <!-- Loading categories... -->
+                <div class="text-sm text-gray-500">Loading categories...</div>
             </div>
         </div>
         
@@ -85,65 +70,32 @@ templ FilterSidebar() {
             <h4 class="font-medium text-gray-900 mb-3">Price Range</h4>
             <div class="space-y-2">
                 <label class="flex items-center">
-                    <input type="radio" x-model="filters.priceRange" value="0-25" name="price" class="text-yellow-500 focus:ring-yellow-500" style="accent-color: #f4cc1d;" />
+                    <input type="radio" x-model="filters.priceRange" value="" @change="applyFilters()" name="price" class="text-yellow-500 focus:ring-yellow-500" style="accent-color: #f4cc1d;" />
+                    <span class="ml-2 text-sm text-gray-700">All Prices</span>
+                </label>
+                <label class="flex items-center">
+                    <input type="radio" x-model="filters.priceRange" value="0-25" @change="applyFilters()" name="price" class="text-yellow-500 focus:ring-yellow-500" style="accent-color: #f4cc1d;" />
                     <span class="ml-2 text-sm text-gray-700">$0 - $25</span>
                 </label>
                 <label class="flex items-center">
-                    <input type="radio" x-model="filters.priceRange" value="25-50" name="price" class="text-yellow-500 focus:ring-yellow-500" style="accent-color: #f4cc1d;" />
+                    <input type="radio" x-model="filters.priceRange" value="25-50" @change="applyFilters()" name="price" class="text-yellow-500 focus:ring-yellow-500" style="accent-color: #f4cc1d;" />
                     <span class="ml-2 text-sm text-gray-700">$25 - $50</span>
                 </label>
                 <label class="flex items-center">
-                    <input type="radio" x-model="filters.priceRange" value="50-100" name="price" class="text-yellow-500 focus:ring-yellow-500" style="accent-color: #f4cc1d;" />
+                    <input type="radio" x-model="filters.priceRange" value="50-100" @change="applyFilters()" name="price" class="text-yellow-500 focus:ring-yellow-500" style="accent-color: #f4cc1d;" />
                     <span class="ml-2 text-sm text-gray-700">$50 - $100</span>
                 </label>
                 <label class="flex items-center">
-                    <input type="radio" x-model="filters.priceRange" value="100+" name="price" class="text-yellow-500 focus:ring-yellow-500" style="accent-color: #f4cc1d;" />
+                    <input type="radio" x-model="filters.priceRange" value="100+" @change="applyFilters()" name="price" class="text-yellow-500 focus:ring-yellow-500" style="accent-color: #f4cc1d;" />
                     <span class="ml-2 text-sm text-gray-700">$100+</span>
                 </label>
             </div>
         </div>
         
-        <!-- Brands -->
-        <div class="mb-6">
-            <h4 class="font-medium text-gray-900 mb-3">Brands</h4>
-            <div class="space-y-2">
-                <label class="flex items-center">
-                    <input type="checkbox" x-model="filters.brands" value="bosch" class="rounded text-yellow-500 focus:ring-yellow-500" style="accent-color: #f4cc1d;" />
-                    <span class="ml-2 text-sm text-gray-700">Bosch</span>
-                </label>
-                <label class="flex items-center">
-                    <input type="checkbox" x-model="filters.brands" value="mann" class="rounded text-yellow-500 focus:ring-yellow-500" style="accent-color: #f4cc1d;" />
-                    <span class="ml-2 text-sm text-gray-700">MANN-FILTER</span>
-                </label>
-                <label class="flex items-center">
-                    <input type="checkbox" x-model="filters.brands" value="fram" class="rounded text-yellow-500 focus:ring-yellow-500" style="accent-color: #f4cc1d;" />
-                    <span class="ml-2 text-sm text-gray-700">Fram</span>
-                </label>
-                <label class="flex items-center">
-                    <input type="checkbox" x-model="filters.brands" value="wix" class="rounded text-yellow-500 focus:ring-yellow-500" style="accent-color: #f4cc1d;" />
-                    <span class="ml-2 text-sm text-gray-700">WIX</span>
-                </label>
-            </div>
-        </div>
-        
-        <!-- Vehicle Compatibility -->
-        <div class="mb-6">
-            <h4 class="font-medium text-gray-900 mb-3">Vehicle Make</h4>
-            <select x-model="filters.vehicleMake" class="w-full px-3 py-2 border border-gray-300 rounded-md form-input focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent">
-                <option value="">All Makes</option>
-                <option value="toyota">Toyota</option>
-                <option value="honda">Honda</option>
-                <option value="ford">Ford</option>
-                <option value="chevrolet">Chevrolet</option>
-                <option value="bmw">BMW</option>
-                <option value="mercedes">Mercedes-Benz</option>
-            </select>
-        </div>
-        
         <!-- Clear Filters -->
         <button 
             @click="clearFilters()"
-            class="w-full py-2 px-4 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+            class="w-full px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
         >
             Clear All Filters
         </button>
@@ -153,18 +105,17 @@ templ FilterSidebar() {
 templ ProductsHeader() {
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
         <div class="mb-4 sm:mb-0">
-            <p class="text-sm text-gray-600" x-text="`Showing ${filteredProducts.length} results`"></p>
+            <p class="text-sm text-gray-600" x-text="`Showing ${totalCount} results`">Loading...</p>
         </div>
         
         <div class="flex items-center space-x-4">
             <!-- Sort Dropdown -->
             <div class="relative">
-                <select x-model="sortBy" class="px-3 py-2 border border-gray-300 rounded-md form-input focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent">
+                <select x-model="sortBy" @change="applyFilters()" class="px-3 py-2 border border-gray-300 rounded-md form-input focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent">
+                    <option value="newest">Newest First</option>
                     <option value="name">Sort by Name</option>
                     <option value="price-low">Price: Low to High</option>
                     <option value="price-high">Price: High to Low</option>
-                    <option value="rating">Rating</option>
-                    <option value="newest">Newest First</option>
                 </select>
             </div>
             
@@ -196,118 +147,35 @@ templ ProductsHeader() {
 }
 
 templ ProductsGrid() {
-    <div 
-        :class="viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' : 'space-y-4'"
-        id="products-grid"
-    >
-        <template x-for="product in paginatedProducts" :key="product.id">
-            <div class="product-card bg-white rounded-lg shadow-sm hover:shadow-lg transition-all duration-300">
-                <!-- Grid View -->
-                <div x-show="viewMode === 'grid'" class="p-6">
-                    <div class="aspect-square bg-gray-100 rounded-lg mb-4 overflow-hidden">
-                        <div class="w-full h-full flex items-center justify-center">
-                            <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 7.172V5L8 4z"/>
-                            </svg>
-                        </div>
-                    </div>
-                    <h3 class="font-semibold text-gray-900 mb-2" x-text="product.name" style="color: #000755;"></h3>
-                    <p class="text-sm text-gray-600 mb-2" x-text="product.description"></p>
-                    <div class="flex items-center mb-2">
-                        <div class="flex text-yellow-400">
-                            <template x-for="i in 5">
-                                <svg :class="i <= product.rating ? 'text-yellow-400' : 'text-gray-300'" class="w-4 h-4 fill-current" viewBox="0 0 20 20">
-                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                                </svg>
-                            </template>
-                        </div>
-                        <span class="ml-2 text-sm text-gray-600" x-text="`(${product.reviews})`"></span>
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <span class="text-xl font-bold" style="color: #f4cc1d;" x-text="'$' + product.price"></span>
-                        <button 
-                            @click="addToCart(product)"
-                            class="px-4 py-2 text-blue-900 font-semibold rounded-md shadow-sm hover:shadow-md transition-all duration-200 hover:scale-105"
-                            style="background-color: #f4cc1d; color: #000755;"
-                        >
-                            Add to Cart
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- List View -->
-                <div x-show="viewMode === 'list'" class="flex p-6">
-                    <div class="w-24 h-24 bg-gray-100 rounded-lg mr-4 flex-shrink-0">
-                        <div class="w-full h-full flex items-center justify-center">
-                            <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 7.172V5L8 4z"/>
-                            </svg>
-                        </div>
-                    </div>
-                    <div class="flex-1">
-                        <h3 class="font-semibold text-lg mb-1" x-text="product.name" style="color: #000755;"></h3>
-                        <p class="text-gray-600 mb-2" x-text="product.description"></p>
-                        <div class="flex items-center mb-2">
-                            <div class="flex text-yellow-400 mr-2">
-                                <template x-for="i in 5">
-                                    <svg :class="i <= product.rating ? 'text-yellow-400' : 'text-gray-300'" class="w-4 h-4 fill-current" viewBox="0 0 20 20">
-                                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
-                                    </svg>
-                                </template>
-                            </div>
-                            <span class="text-sm text-gray-600" x-text="`(${product.reviews} reviews)`"></span>
-                        </div>
-                        <div class="flex items-center justify-between">
-                            <span class="text-2xl font-bold" style="color: #f4cc1d;" x-text="'$' + product.price"></span>
-                            <button 
-                                @click="addToCart(product)"
-                                class="px-6 py-2 text-blue-900 font-semibold rounded-md shadow-sm hover:shadow-md transition-all duration-200 hover:scale-105"
-                                style="background-color: #f4cc1d; color: #000755;"
-                            >
-                                Add to Cart
-                            </button>
-                        </div>
-                    </div>
-                </div>
+    <div>
+        <!-- Products Container -->
+        <div 
+            :class="viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' : 'space-y-4'"
+            id="products-container"
+            hx-get="/products"
+            hx-trigger="load"
+            hx-target="#products-container"
+            hx-swap="innerHTML"
+        >
+            <!-- Loading State -->
+            <div class="col-span-full flex justify-center py-12">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
             </div>
-        </template>
-    </div>
-}
-
-templ Pagination() {
-    <div class="mt-12 flex items-center justify-between">
-        <div class="text-sm text-gray-700">
-            <span x-text="`Showing ${(currentPage - 1) * itemsPerPage + 1} to ${Math.min(currentPage * itemsPerPage, filteredProducts.length)} of ${filteredProducts.length} results`"></span>
         </div>
         
-        <div class="flex items-center space-x-2">
-            <button 
-                @click="previousPage()"
-                :disabled="currentPage === 1"
-                :class="currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''"
-                class="px-3 py-2 text-gray-500 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-            >
-                Previous
-            </button>
-            
-            <template x-for="page in paginationPages" :key="page">
-                <button 
-                    @click="currentPage = page"
-                    :class="page === currentPage ? 'text-blue-900' : 'text-gray-500'"
-                    :style="page === currentPage ? 'background-color: #f4cc1d; color: #000755;' : ''"
-                    class="px-3 py-2 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-                    x-text="page"
-                ></button>
-            </template>
-            
-            <button 
-                @click="nextPage()"
-                :disabled="currentPage === totalPages"
-                :class="currentPage === totalPages ? 'opacity-50 cursor-not-allowed' : ''"
-                class="px-3 py-2 text-gray-500 border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
-            >
-                Next
-            </button>
+        <!-- Infinite Scroll Trigger -->
+        <div 
+            id="infinite-scroll-trigger"
+            x-show="hasMore && !loading"
+            x-intersect="loadMore()"
+            class="h-20 flex items-center justify-center"
+        >
+            <div x-show="loading" class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
+        </div>
+        
+        <!-- End of Results -->
+        <div x-show="!hasMore && products.length > 0" class="text-center py-8">
+            <p class="text-gray-500">You've reached the end of results</p>
         </div>
     </div>
 
@@ -316,122 +184,98 @@ templ Pagination() {
         function productStore() {
             return {
                 viewMode: 'grid',
-                sortBy: 'name',
+                sortBy: 'newest',
                 currentPage: 1,
-                itemsPerPage: 12,
+                totalCount: 0,
+                hasMore: true,
+                loading: false,
+                products: [],
                 filters: {
                     search: '',
-                    categories: [],
-                    priceRange: '',
-                    brands: [],
-                    vehicleMake: ''
+                    category: '',
+                    priceRange: ''
                 },
-                products: [
-                    { id: 1, name: 'Engine Air Filter', description: 'Premium engine air filter for optimal performance', price: 24.99, rating: 5, reviews: 127, category: 'air-filters', brand: 'bosch' },
-                    { id: 2, name: 'Oil Filter', description: 'High-quality oil filter for engine protection', price: 12.99, rating: 4, reviews: 89, category: 'oil-filters', brand: 'mann' },
-                    { id: 3, name: 'Cabin Air Filter', description: 'Clean air filter for passenger compartment', price: 19.99, rating: 5, reviews: 156, category: 'air-filters', brand: 'fram' },
-                    { id: 4, name: 'Fuel Filter', description: 'Reliable fuel filter for clean fuel delivery', price: 15.99, rating: 4, reviews: 78, category: 'fuel-filters', brand: 'wix' },
-                    { id: 5, name: 'Brake Pads Set', description: 'Complete brake pads set for front wheels', price: 89.99, rating: 5, reviews: 203, category: 'brake-parts', brand: 'bosch' },
-                    { id: 6, name: 'Brake Rotors', description: 'High-performance brake rotors pair', price: 129.99, rating: 4, reviews: 145, category: 'brake-parts', brand: 'mann' },
-                    { id: 7, name: 'Spark Plugs Set', description: 'Premium spark plugs for better ignition', price: 34.99, rating: 5, reviews: 92, category: 'engine-parts', brand: 'bosch' },
-                    { id: 8, name: 'Performance Air Filter', description: 'High-flow air filter for enhanced performance', price: 39.99, rating: 4, reviews: 67, category: 'air-filters', brand: 'fram' },
-                    { id: 9, name: 'Synthetic Oil Filter', description: 'Advanced synthetic oil filter technology', price: 18.99, rating: 5, reviews: 134, category: 'oil-filters', brand: 'wix' },
-                    { id: 10, name: 'Diesel Fuel Filter', description: 'Heavy-duty diesel fuel filter', price: 32.99, rating: 4, reviews: 56, category: 'fuel-filters', brand: 'mann' },
-                    { id: 11, name: 'Brake Fluid', description: 'Premium brake fluid for optimal braking', price: 14.99, rating: 4, reviews: 89, category: 'brake-parts', brand: 'bosch' },
-                    { id: 12, name: 'Engine Oil', description: 'High-quality engine oil for all conditions', price: 24.99, rating: 5, reviews: 178, category: 'engine-parts', brand: 'fram' }
-                ],
                 
-                get filteredProducts() {
-                    let filtered = this.products;
+                init() {
+                    this.loadProducts(true);
+                },
+                
+                buildQueryParams() {
+                    const params = new URLSearchParams();
+                    params.append('page', this.currentPage.toString());
+                    params.append('limit', '12');
+                    params.append('sort_by', this.sortBy);
                     
-                    if (this.filters.search) {
-                        filtered = filtered.filter(p => 
-                            p.name.toLowerCase().includes(this.filters.search.toLowerCase()) ||
-                            p.description.toLowerCase().includes(this.filters.search.toLowerCase())
-                        );
-                    }
-                    
-                    if (this.filters.categories.length > 0) {
-                        filtered = filtered.filter(p => this.filters.categories.includes(p.category));
-                    }
-                    
-                    if (this.filters.brands.length > 0) {
-                        filtered = filtered.filter(p => this.filters.brands.includes(p.brand));
-                    }
+                    if (this.filters.search) params.append('search', this.filters.search);
+                    if (this.filters.category) params.append('category', this.filters.category);
                     
                     if (this.filters.priceRange) {
-                        const [min, max] = this.filters.priceRange.split('-').map(p => p === '+' ? Infinity : parseFloat(p.replace('+', '')));
-                        filtered = filtered.filter(p => {
-                            if (max === undefined) return p.price >= min;
-                            return p.price >= min && p.price <= max;
-                        });
+                        const [min, max] = this.filters.priceRange.split('-');
+                        if (min) params.append('min_price', min);
+                        if (max && max !== '+') params.append('max_price', max);
+                        if (max === '+') params.append('min_price', min);
                     }
                     
-                    return this.sortProducts(filtered);
+                    return params.toString();
                 },
                 
-                get paginatedProducts() {
-                    const start = (this.currentPage - 1) * this.itemsPerPage;
-                    const end = start + this.itemsPerPage;
-                    return this.filteredProducts.slice(start, end);
-                },
-                
-                get totalPages() {
-                    return Math.ceil(this.filteredProducts.length / this.itemsPerPage);
-                },
-                
-                get paginationPages() {
-                    const pages = [];
-                    const total = this.totalPages;
-                    const current = this.currentPage;
+                loadProducts(reset = false) {
+                    if (this.loading) return;
                     
-                    for (let i = Math.max(1, current - 2); i <= Math.min(total, current + 2); i++) {
-                        pages.push(i);
+                    this.loading = true;
+                    if (reset) {
+                        this.currentPage = 1;
+                        this.products = [];
                     }
                     
-                    return pages;
+                    const queryParams = this.buildQueryParams();
+                    
+                    htmx.ajax('GET', `/products?${queryParams}`, {
+                        target: reset ? '#products-container' : '#products-container',
+                        swap: reset ? 'innerHTML' : 'beforeend'
+                    }).then(() => {
+                        this.updatePaginationInfo();
+                        this.loading = false;
+                    });
                 },
                 
-                sortProducts(products) {
-                    switch (this.sortBy) {
-                        case 'price-low':
-                            return [...products].sort((a, b) => a.price - b.price);
-                        case 'price-high':
-                            return [...products].sort((a, b) => b.price - a.price);
-                        case 'rating':
-                            return [...products].sort((a, b) => b.rating - a.rating);
-                        case 'name':
-                        default:
-                            return [...products].sort((a, b) => a.name.localeCompare(b.name));
+                updatePaginationInfo() {
+                    const paginationInfo = document.getElementById('pagination-info');
+                    if (paginationInfo) {
+                        const currentPage = parseInt(paginationInfo.dataset.currentPage);
+                        const totalCount = parseInt(paginationInfo.dataset.totalCount);
+                        const limit = parseInt(paginationInfo.dataset.limit);
+                        const hasMore = paginationInfo.dataset.hasMore === 'true';
+                        
+                        this.currentPage = currentPage;
+                        this.totalCount = totalCount;
+                        this.hasMore = hasMore;
+                    }
+                },
+                
+                applyFilters() {
+                    this.loadProducts(true);
+                },
+                
+                loadMore() {
+                    if (this.hasMore && !this.loading) {
+                        this.currentPage++;
+                        this.loadProducts(false);
                     }
                 },
                 
                 clearFilters() {
                     this.filters = {
                         search: '',
-                        categories: [],
-                        priceRange: '',
-                        brands: [],
-                        vehicleMake: ''
+                        category: '',
+                        priceRange: ''
                     };
-                    this.currentPage = 1;
-                },
-                
-                previousPage() {
-                    if (this.currentPage > 1) {
-                        this.currentPage--;
-                    }
-                },
-                
-                nextPage() {
-                    if (this.currentPage < this.totalPages) {
-                        this.currentPage++;
-                    }
+                    this.sortBy = 'newest';
+                    this.loadProducts(true);
                 },
                 
                 addToCart(product) {
-                    console.log('Adding to cart:', product);
-                    alert(`${product.name} added to cart!`);
+                    Alpine.store('cart').addItem(product);
                 }
             }
         }

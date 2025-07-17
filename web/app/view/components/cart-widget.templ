@@ -1,0 +1,130 @@
+package components
+
+templ CartWidget() {
+    <!-- Floating Cart Widget -->
+    <div class="fixed bottom-6 right-6 z-50" x-data="cart">
+        <!-- Cart Button -->
+        <div class="relative">
+            <button 
+                @click="toggleCart()" 
+                class="w-16 h-16 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 hover:scale-110 hover:shadow-3xl group"
+                style="background: linear-gradient(135deg, #f4cc1d 0%, #e6b800 100%);"
+            >
+                <svg class="w-8 h-8 group-hover:scale-110 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="color: #000755;">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.5 6M7 13l-1.5-6m0 0L3 3M7 13h10M17 21a2 2 0 100-4 2 2 0 000 4zM9 21a2 2 0 100-4 2 2 0 000 4z"/>
+                </svg>
+                
+                <!-- Cart Count Badge -->
+                <span 
+                    x-show="itemCount > 0" 
+                    x-text="itemCount" 
+                    x-transition
+                    class="absolute -top-2 -right-2 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shadow-lg border-2 border-white"
+                    style="background-color: #000755; color: #f4cc1d;"
+                ></span>
+            </button>
+            
+            <!-- Hover Tooltip -->
+            <div class="absolute bottom-full right-0 mb-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+                <div class="bg-gray-900 text-white text-sm px-3 py-1 rounded-lg shadow-lg whitespace-nowrap">
+                    Shopping Cart
+                    <div class="absolute top-full right-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Cart Dropdown Panel -->
+        <div 
+            x-show="isOpen" 
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0 translate-y-2 scale-95"
+            x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+            x-transition:leave-end="opacity-0 translate-y-2 scale-95"
+            @click.away="isOpen = false" 
+            class="absolute bottom-20 right-0 w-96 bg-white rounded-2xl shadow-2xl border border-gray-200 max-h-96 overflow-hidden"
+        >
+            <div class="p-6">
+                <!-- Cart Header -->
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-xl font-bold" style="color: #000755;">Shopping Cart</h3>
+                    <button @click="isOpen = false" class="text-gray-400 hover:text-gray-600 transition-colors">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+                
+                <!-- Empty Cart -->
+                <div x-show="items.length === 0" class="text-center py-8">
+                    <svg class="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.5 6M7 13l-1.5-6m0 0L3 3M7 13h10M17 21a2 2 0 100-4 2 2 0 000 4zM9 21a2 2 0 100-4 2 2 0 000 4z"/>
+                    </svg>
+                    <p class="text-gray-500 text-lg">Your cart is empty</p>
+                    <p class="text-gray-400 text-sm mt-1">Add some auto parts to get started</p>
+                </div>
+                
+                <!-- Cart Items -->
+                <div x-show="items.length > 0" class="space-y-4">
+                    <div class="max-h-48 overflow-y-auto space-y-3">
+                        <template x-for="item in items" :key="item.id">
+                            <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-xl">
+                                <!-- Product Image Placeholder -->
+                                <div class="w-12 h-12 bg-gradient-to-br from-gray-200 to-gray-300 rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 7.172V5L8 4z"/>
+                                    </svg>
+                                </div>
+                                
+                                <!-- Product Details -->
+                                <div class="flex-1 min-w-0">
+                                    <h4 class="text-sm font-semibold text-gray-900 truncate" x-text="item.name"></h4>
+                                    <div class="flex items-center justify-between mt-1">
+                                        <p class="text-sm font-medium" style="color: #f4cc1d;" x-text="'$' + item.price"></p>
+                                        <p class="text-xs text-gray-500" x-text="'Qty: ' + item.quantity"></p>
+                                    </div>
+                                </div>
+                                
+                                <!-- Remove Button -->
+                                <button 
+                                    @click="removeItem(item.id)" 
+                                    class="text-red-400 hover:text-red-600 transition-colors p-1 rounded-full hover:bg-red-50"
+                                    title="Remove item"
+                                >
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </template>
+                    </div>
+                    
+                    <!-- Cart Total and Actions -->
+                    <div class="mt-6 pt-4 border-t border-gray-200">
+                        <div class="flex justify-between items-center mb-4">
+                            <span class="text-lg font-semibold" style="color: #000755;">Total:</span>
+                            <span class="text-xl font-bold" style="color: #f4cc1d;" x-text="'$' + total.toFixed(2)"></span>
+                        </div>
+                        
+                        <div class="space-y-2">
+                            <a 
+                                href="/checkout"
+                                class="w-full py-3 text-center font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 block"
+                                style="background-color: #f4cc1d; color: #000755;"
+                            >
+                                Proceed to Checkout
+                            </a>
+                            <button 
+                                @click="isOpen = false"
+                                class="w-full py-2 text-center text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors"
+                            >
+                                Continue Shopping
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+} 

@@ -1,6 +1,7 @@
 package web
 
 import (
+	"main/web/admin"
 	"main/web/app"
 
 	"github.com/UchaBokeria/goyard/goyard"
@@ -31,7 +32,7 @@ func New() {
 	// 	ContentSecurityPolicy: "default-src 'self'; img-src *; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'",
 	// }))
 
-	// admin.New(web)
 	app.New(web)
+	admin.New(web)
 	web.Logger.Fatal(web.Run(":3000"))
 }

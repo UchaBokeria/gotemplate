@@ -15,11 +15,7 @@ var Seed = []models.Users{
 		EmailVerified:   true,
 		Phone:           "599 156 862",
 		EmailVerifyedAt: time.Now(),
-		PhoneVerified:   true,
-		PhoneVerifiedAt: time.Now(),
 		TypeID:          1,
-		// Company:         pipes.ToPointer("AlfaShop"),
-		// CityID:          pipes.ToPointer(1),
 	},
 }
 

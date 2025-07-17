@@ -1,0 +1,83 @@
+package components
+
+import (
+	"main/internal/models"
+	"fmt"
+)
+
+templ ProductsTable(products []models.Product) {
+	<div class="bg-white rounded-lg shadow overflow-hidden" id="products-table">
+		<div class="overflow-x-auto">
+			<table class="min-w-full divide-y divide-gray-200">
+				<thead class="bg-gray-50">
+					<tr>
+						<th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+						<th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+						<th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+						<th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
+						<th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+						<th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+					</tr>
+				</thead>
+				<tbody class="bg-white divide-y divide-gray-200">
+					if len(products) == 0 {
+						<tr>
+							<td colspan="6" class="px-6 py-8 text-center text-sm text-gray-500">
+								<div class="flex flex-col items-center">
+									<svg class="w-12 h-12 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"></path>
+									</svg>
+									<p class="text-lg font-medium text-gray-900 mb-2">No products found</p>
+									<p class="text-sm text-gray-500">Get started by adding your first product</p>
+								</div>
+							</td>
+						</tr>
+					} else {
+						for _, product := range products {
+							<tr class="hover:bg-gray-50">
+								<td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{ product.Name }</td>
+								<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{ product.Category }</td>
+								<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${ fmt.Sprintf("%.2f", product.Price) }</td>
+								<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{ fmt.Sprintf("%d", product.Stock) }</td>
+								<td class="px-6 py-4 whitespace-nowrap">
+									<span class={ fmt.Sprintf("inline-flex px-2 py-1 text-xs font-semibold rounded-full %s", getStatusClass(product.Status)) }>
+										{ product.Status }
+									</span>
+								</td>
+								<td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+									<div class="flex space-x-2">
+										<button 
+											@click={ fmt.Sprintf("editItem({id: %d, name: '%s', category: '%s', price: %.2f, stock: %d, status: '%s', description: '%s'})", product.ID, product.Name, product.Category, product.Price, product.Stock, product.Status, product.Description) }
+											class="text-blue-600 hover:text-blue-900 text-sm font-medium"
+										>
+											Edit
+										</button>
+										<button 
+											@click={ fmt.Sprintf("deleteItem({id: %d, name: '%s'})", product.ID, product.Name) }
+											class="text-red-600 hover:text-red-900 text-sm font-medium"
+										>
+											Delete
+										</button>
+									</div>
+								</td>
+							</tr>
+						}
+					}
+				</tbody>
+			</table>
+		</div>
+	</div>
+}
+
+func getStatusClass(status string) string {
+	switch status {
+	case "active":
+		return "bg-green-100 text-green-800"
+	case "inactive":
+		return "bg-red-100 text-red-800"
+	case "draft":
+		return "bg-yellow-100 text-yellow-800"
+	default:
+		return "bg-gray-100 text-gray-800"
+	}
+} 

@@ -18,22 +18,22 @@ import (
 var DB *gorm.DB
 
 type DBConfig struct {
-	Host     string
-	Port     string
-	Password string
-	User     string
-	DBName   string
-	SSLMode  string
+	DB_HOST    string
+	DB_PORT    string
+	DB_PASS    string
+	DB_USER    string
+	DB_SSLMODE string
+	DB_NAME    string
 }
 
 func Default() *DBConfig {
 	return &DBConfig{
-		Host:     config.Env.DB_HOST,
-		Port:     config.Env.DB_PORT,
-		Password: config.Env.DB_PASS,
-		User:     config.Env.DB_USER,
-		SSLMode:  config.Env.DB_SSLMODE,
-		DBName:   config.Env.DB_NAME,
+		DB_HOST:    config.Env.DB_HOST,
+		DB_PORT:    config.Env.DB_PORT,
+		DB_PASS:    config.Env.DB_PASS,
+		DB_USER:    config.Env.DB_USER,
+		DB_SSLMODE: config.Env.DB_SSLMODE,
+		DB_NAME:    config.Env.DB_NAME,
 	}
 }
 
@@ -49,7 +49,12 @@ func Connect(config *DBConfig) {
 	db, err := gorm.Open(postgres.New(postgres.Config{
 		DSN: fmt.Sprintf(
 			"host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
-			config.Host, config.Port, config.User, config.Password, config.DBName, config.SSLMode,
+			config.DB_HOST,
+			config.DB_PORT,
+			config.DB_USER,
+			config.DB_PASS,
+			config.DB_NAME,
+			config.DB_SSLMODE,
 		),
 		// Conn: connStr,
 		PreferSimpleProtocol: true,

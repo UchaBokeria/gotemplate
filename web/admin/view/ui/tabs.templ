@@ -1,0 +1,35 @@
+package ui
+
+templ Tabs(activeTab string) {
+	<div class="mb-6">
+		<div class="border-b border-gray-200">
+			<nav class="-mb-px flex space-x-8">
+				<button 
+					@click="activeTab = 'general'"
+					:class="{ 'border-blue-500 text-blue-600': activeTab === 'general', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'general' }"
+					class="whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm"
+				>
+					General
+				</button>
+				<button 
+					@click="activeTab = 'translation'"
+					:class="{ 'border-blue-500 text-blue-600': activeTab === 'translation', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'translation' }"
+					class="whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm"
+				>
+					Translation
+				</button>
+				<button 
+					@click="activeTab = 'payments'"
+					:class="{ 'border-blue-500 text-blue-600': activeTab === 'payments', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'payments' }"
+					class="whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm"
+				>
+					Payments
+				</button>
+			</nav>
+		</div>
+	</div>
+}
+
+templ TabContent() {
+	{ children... }
+} 

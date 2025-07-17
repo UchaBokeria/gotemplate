@@ -9,6 +9,5 @@ import (
 func main() {
 	config.SetupEnvironmentVariables()
 	storage.Connect(storage.Default())
-	schema.FilterEnums()
 	storage.DB.Migrator().AutoMigrate(schema.Models...)
 }
