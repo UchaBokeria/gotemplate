@@ -14,7 +14,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func list(ctx *controller.Context[any], listDto *dtos.TranslationListDto) error {
+func list(ctx *controller.Context, listDto *dtos.TranslationListDto) error {
 	var translations []models.Translation
 	var total int64
 
@@ -50,7 +50,7 @@ func list(ctx *controller.Context[any], listDto *dtos.TranslationListDto) error 
 	return ctx.Html(components.TranslationsTable(translations))
 }
 
-func show(ctx *controller.Context[any], idDto *dto.ByID) error {
+func show(ctx *controller.Context, idDto *dto.ByID) error {
 	var translation models.Translation
 
 	if err := storage.DB.First(&translation, idDto.ID).Error; err != nil {
@@ -63,7 +63,7 @@ func show(ctx *controller.Context[any], idDto *dto.ByID) error {
 	return ctx.String(http.StatusOK, fmt.Sprintf("Translation: %s (%s) = %s", translation.Key, translation.Language, translation.Value))
 }
 
-func create(ctx *controller.Context[any], createDto *dtos.CreateTranslationDto) error {
+func create(ctx *controller.Context, createDto *dtos.CreateTranslationDto) error {
 	var existing models.Translation
 	result := storage.DB.Where("key = ? AND language = ?", createDto.Key, createDto.Language).First(&existing)
 	if result.Error == nil {
@@ -86,7 +86,7 @@ func create(ctx *controller.Context[any], createDto *dtos.CreateTranslationDto) 
 	return ctx.Html(components.TranslationsTable(translations))
 }
 
-func update(ctx *controller.Context[any], updateDto *dtos.UpdateTranslationDto) error {
+func update(ctx *controller.Context, updateDto *dtos.UpdateTranslationDto) error {
 	var translation models.Translation
 
 	if err := storage.DB.First(&translation, updateDto.ID).Error; err != nil {
@@ -118,7 +118,7 @@ func update(ctx *controller.Context[any], updateDto *dtos.UpdateTranslationDto) 
 	return ctx.Html(components.TranslationsTable(translations))
 }
 
-func deleteTranslation(ctx *controller.Context[any], deleteDto *dto.ByID) error {
+func deleteTranslation(ctx *controller.Context, deleteDto *dto.ByID) error {
 	var translation models.Translation
 
 	if err := storage.DB.First(&translation, deleteDto.ID).Error; err != nil {

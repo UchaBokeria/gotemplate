@@ -57,7 +57,7 @@ func main() {
     app := goyard.New()
     
     // Basic route
-    app.GET("/", controller.Use(func(ctx *controller.Context[any]) error {
+    app.GET("/", controller.Use(func(ctx *controller.Context) error {
         return ctx.String(200, "Hello, Goyard!")
     }))
     
@@ -85,7 +85,7 @@ templ HomePage() {
     </html>
 }
 
-func home(ctx *controller.Context[any]) error {
+func home(ctx *controller.Context) error {
     return ctx.Html(HomePage())
 }
 
@@ -148,7 +148,7 @@ type CreateUserDTO struct {
 }
 
 // Handler automatically receives validated DTO
-func createUser(ctx *controller.Context[any], dto *CreateUserDTO) error {
+func createUser(ctx *controller.Context, dto *CreateUserDTO) error {
     // DTO is automatically bound and validated
     // Process user creation
     return ctx.JSON(200, map[string]string{"status": "created"})
@@ -161,7 +161,7 @@ app.POST("/users", controller.Set[CreateUserDTO](createUser))
 ### Context Methods
 
 ```go
-func handler(ctx *controller.Context[any]) error {
+func handler(ctx *controller.Context) error {
     // Basic responses
     ctx.String(200, "Hello")
     ctx.JSON(200, data)
@@ -216,7 +216,7 @@ type UserDTO struct {
 
 ```go
 // This handler automatically gets validated DTO
-func updateUser(ctx *controller.Context[any], dto *UserDTO) error {
+func updateUser(ctx *controller.Context, dto *UserDTO) error {
     // dto is guaranteed to be valid
     // Handle business logic
     return ctx.JSON(200, dto)
@@ -258,7 +258,7 @@ Password string `validate:"required,strongpwd"`
 ```go
 import "github.com/UchaBokeria/goyard/controller"
 
-func someHandler(ctx *controller.Context[any]) error {
+func someHandler(ctx *controller.Context) error {
     var dto UserDTO
     // ... populate dto ...
     
@@ -286,7 +286,7 @@ templ UserCard(user User) {
 }
 
 // Render in handler
-func showUser(ctx *controller.Context[any]) error {
+func showUser(ctx *controller.Context) error {
     user := getUserFromDB()
     return ctx.Html(UserCard(user))
 }
@@ -295,7 +295,7 @@ func showUser(ctx *controller.Context[any]) error {
 ### HTMX-Aware Rendering
 
 ```go
-func userProfile(ctx *controller.Context[any]) error {
+func userProfile(ctx *controller.Context) error {
     user := getCurrentUser()
     
     // Automatically detects HTMX requests
@@ -308,7 +308,7 @@ func userProfile(ctx *controller.Context[any]) error {
 ### Manual Render Control
 
 ```go
-func handler(ctx *controller.Context[any]) error {
+func handler(ctx *controller.Context) error {
     // Always render full component (ignores HTMX)
     return ctx.Renders(200, component)
     
@@ -363,7 +363,7 @@ templ UserForm() {
 ### HTMX Request Detection
 
 ```go
-func handler(ctx *controller.Context[any]) error {
+func handler(ctx *controller.Context) error {
     if ctx.IsHtmx() {
         // Return partial content for HTMX
         return ctx.Html(UserListPartial())
@@ -413,7 +413,7 @@ func HtmxMiddleware() echo.MiddlewareFunc {
 // Interceptor middleware
 func InterceptorMiddleware() echo.MiddlewareFunc {
     return func(next echo.HandlerFunc) echo.HandlerFunc {
-        return controller.Set[any](func(ctx *controller.Context[any]) error {
+        return controller.Set[any](func(ctx *controller.Context) error {
             // Pre-processing logic
             return next(ctx)
         })
@@ -435,7 +435,7 @@ upload.Dir = "./custom/upload/path/"
 ### Handling File Uploads
 
 ```go
-func uploadHandler(ctx *controller.Context[any]) error {
+func uploadHandler(ctx *controller.Context) error {
     // Get file from form
     file, err := ctx.FormFile("file")
     if err != nil {
@@ -525,7 +525,7 @@ uintPtr := pipes.UintToPtInt(u) // uint to *int
 ### Cookie Management
 
 ```go
-func handler(ctx *controller.Context[any]) error {
+func handler(ctx *controller.Context) error {
     // Write cookie
     ctx.WriteCookie(controller.Cookie{
         Key:     "session",
@@ -549,7 +549,7 @@ func handler(ctx *controller.Context[any]) error {
 ### Pagination
 
 ```go
-func listUsers(ctx *controller.Context[any]) error {
+func listUsers(ctx *controller.Context) error {
     page := ctx.Page()         // Gets 'page' query param (default: 1)
     pageSize := ctx.PageSize() // Gets 'pageSize' query param (default: 50, max: 50)
     
@@ -592,7 +592,7 @@ type UpdateUserDTO struct {
 }
 
 // Handlers
-func listUsers(ctx *controller.Context[any]) error {
+func listUsers(ctx *controller.Context) error {
     page := ctx.Page()
     pageSize := ctx.PageSize()
     
@@ -600,7 +600,7 @@ func listUsers(ctx *controller.Context[any]) error {
     return ctx.Json(200, users)
 }
 
-func createUser(ctx *controller.Context[any], dto *CreateUserDTO) error {
+func createUser(ctx *controller.Context, dto *CreateUserDTO) error {
     user := User{
         Name:  dto.Name,
         Email: dto.Email,
@@ -610,13 +610,13 @@ func createUser(ctx *controller.Context[any], dto *CreateUserDTO) error {
     return ctx.JSON(201, savedUser)
 }
 
-func updateUser(ctx *controller.Context[any], dto *UpdateUserDTO) error {
+func updateUser(ctx *controller.Context, dto *UpdateUserDTO) error {
     userID := ctx.Param("id")
     // Update logic here
     return ctx.JSON(200, updatedUser)
 }
 
-func deleteUser(ctx *controller.Context[any]) error {
+func deleteUser(ctx *controller.Context) error {
     userID := ctx.Param("id")
     // Delete logic here
     return ctx.NoContent(204)
@@ -654,11 +654,11 @@ func main() {
     log.Fatal(app.Run(":3000"))
 }
 
-func homePage(ctx *controller.Context[any]) error {
+func homePage(ctx *controller.Context) error {
     return ctx.Html(HomePage())
 }
 
-func usersList(ctx *controller.Context[any]) error {
+func usersList(ctx *controller.Context) error {
     users := getAllUsers()
     
     if ctx.IsHtmx() {
@@ -668,7 +668,7 @@ func usersList(ctx *controller.Context[any]) error {
     return ctx.Html(UsersPage(users))
 }
 
-func createUser(ctx *controller.Context[any], dto *CreateUserDTO) error {
+func createUser(ctx *controller.Context, dto *CreateUserDTO) error {
     user := createNewUser(dto)
     
     // Return the new user component for HTMX to inject

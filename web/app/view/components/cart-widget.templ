@@ -1,6 +1,10 @@
 package components
 
-templ CartWidget() {
+import (
+	"main/web/app/types"
+)
+
+templ CartWidget(webconfig types.WebConfig) {
     <!-- Floating Cart Widget -->
     <div class="fixed bottom-6 right-6 z-50" x-data="cart">
         <!-- Cart Button -->
@@ -27,7 +31,7 @@ templ CartWidget() {
             <!-- Hover Tooltip -->
             <div class="absolute bottom-full right-0 mb-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
                 <div class="bg-gray-900 text-white text-sm px-3 py-1 rounded-lg shadow-lg whitespace-nowrap">
-                    Shopping Cart
+                    { webconfig.Translations["cart.shopping_cart"] }
                     <div class="absolute top-full right-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-900"></div>
                 </div>
             </div>
@@ -48,7 +52,7 @@ templ CartWidget() {
             <div class="p-6">
                 <!-- Cart Header -->
                 <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-xl font-bold" style="color: #000755;">Shopping Cart</h3>
+                    <h3 class="text-xl font-bold" style="color: #000755;">{ webconfig.Translations["cart.shopping_cart"] }</h3>
                     <button @click="isOpen = false" class="text-gray-400 hover:text-gray-600 transition-colors">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -61,8 +65,8 @@ templ CartWidget() {
                     <svg class="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.5 6M7 13l-1.5-6m0 0L3 3M7 13h10M17 21a2 2 0 100-4 2 2 0 000 4zM9 21a2 2 0 100-4 2 2 0 000 4z"/>
                     </svg>
-                    <p class="text-gray-500 text-lg">Your cart is empty</p>
-                    <p class="text-gray-400 text-sm mt-1">Add some auto parts to get started</p>
+                    <p class="text-gray-500 text-lg">{ webconfig.Translations["cart.empty_title"] }</p>
+                    <p class="text-gray-400 text-sm mt-1">{ webconfig.Translations["cart.empty_description"] }</p>
                 </div>
                 
                 <!-- Cart Items -->
@@ -90,7 +94,7 @@ templ CartWidget() {
                                 <button 
                                     @click="removeItem(item.id)" 
                                     class="text-red-400 hover:text-red-600 transition-colors p-1 rounded-full hover:bg-red-50"
-                                    title="Remove item"
+                                    title={ webconfig.Translations["cart.remove_item"] }
                                 >
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
@@ -103,7 +107,7 @@ templ CartWidget() {
                     <!-- Cart Total and Actions -->
                     <div class="mt-6 pt-4 border-t border-gray-200">
                         <div class="flex justify-between items-center mb-4">
-                            <span class="text-lg font-semibold" style="color: #000755;">Total:</span>
+                            <span class="text-lg font-semibold" style="color: #000755;">{ webconfig.Translations["cart.total"] }</span>
                             <span class="text-xl font-bold" style="color: #f4cc1d;" x-text="'$' + total.toFixed(2)"></span>
                         </div>
                         
@@ -113,13 +117,13 @@ templ CartWidget() {
                                 class="w-full py-3 text-center font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 block"
                                 style="background-color: #f4cc1d; color: #000755;"
                             >
-                                Proceed to Checkout
+                                { webconfig.Translations["cart.proceed_to_checkout"] }
                             </a>
                             <button 
                                 @click="isOpen = false"
                                 class="w-full py-2 text-center text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors"
                             >
-                                Continue Shopping
+                                { webconfig.Translations["cart.continue_shopping"] }
                             </button>
                         </div>
                     </div>

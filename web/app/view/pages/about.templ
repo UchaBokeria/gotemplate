@@ -2,72 +2,42 @@ package pages
 
 import (
 	"main/web/app/types"
-	"main/web/app/view"
-	"main/web/app/view/components"
+	"strings"
 )
 
 templ About(webconfig types.WebConfig) {
-    @view.Index(webconfig) {
-        @components.Navigation()
-        
-        <main class="min-h-screen bg-gray-50">
-            <!-- Hero Section -->
-            @AboutHero(webconfig)
-            
-            <!-- Company Story -->
-            @CompanyStory()
-            
-            <!-- Mission & Values -->
-            @MissionValues()
-            
-            <!-- Team Section -->
-            @TeamSection()
-            
-            <!-- Stats Section -->
-            @StatsSection()
-        </main>
-        
-    }
+    @AboutHero(webconfig)
+    @CompanyStory(webconfig)
+    @MissionValues(webconfig)
+    @TeamSection(webconfig)
+    @StatsSection(webconfig)
 }
 
 templ AboutHero(webconfig types.WebConfig) {
     <section class="bg-gradient-to-r from-blue-900 via-blue-800 to-blue-900 text-white py-20" style="background: linear-gradient(135deg, #000755 0%, #1e3a8a 50%, #000755 100%);">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h1 class="text-4xl md:text-6xl font-bold mb-6">About {webconfig.General.CompanyName}</h1>
+            <h1 class="text-4xl md:text-6xl font-bold mb-6">{ strings.Replace(webconfig.Translations["about.heading"], "{CompanyName}", webconfig.General.CompanyName, -1) }</h1>
             <p class="text-xl md:text-2xl mb-8 opacity-90">{webconfig.General.AboutUs}</p>
             <div class="w-20 h-1 mx-auto rounded-full" style="background-color: #f4cc1d;"></div>
         </div>
     </section>
 }
 
-templ CompanyStory() {
+templ CompanyStory(webconfig types.WebConfig) {
     <section class="py-16 bg-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="lg:grid lg:grid-cols-2 lg:gap-12 items-center">
                 <div>
-                    <h2 class="text-3xl font-bold mb-6" style="color: #000755;">Our Story</h2>
+                    <h2 class="text-3xl font-bold mb-6" style="color: #000755;">{ webconfig.Translations["about.story_heading"] }</h2>
                     <div class="space-y-6 text-gray-600">
-                        <p class="text-lg">
-                            Founded in 1995, Alfashop established itself as an exclusive automotive parts importer, 
-                            building strategic partnerships with world-renowned manufacturers to bring premium quality 
-                            components to the local market at competitive prices.
-                        </p>
-                        <p>
-                            Through nearly three decades of operation, we've evolved from a pioneering import operation 
-                            to a leading distribution network, serving automotive professionals and enthusiasts nationwide. 
-                            Our exclusive brand partnerships allow us direct access to OEM-quality parts and the latest innovations.
-                        </p>
-                        <p>
-                            Today, Alfashop maintains exclusive import agreements with leading international brands, 
-                            ensuring our customers receive authentic, premium automotive parts backed by manufacturer warranties. 
-                            Our specialized import expertise and industry relationships guarantee exceptional value and availability.
-                        </p>
+                        <p class="text-lg">{ webconfig.Translations["about.story_1"] }</p>
+                        <p>{ webconfig.Translations["about.story_2"] }</p>
+                        <p>{ webconfig.Translations["about.story_3"] }</p>
                     </div>
                 </div>
                 <div class="mt-8 lg:mt-0">
                     <div class="rounded-2xl h-96 flex items-center justify-center shadow-inner">
-                        <img src="/assets/images/logo.png" alt="Alfashop Logo" class="w-full h-full object-contain filter drop-shadow-lg" />
-
+                        <img src="/assets/images/logo.png" alt={ webconfig.Translations["nav.logo_alt"] } class="w-full h-full object-contain filter drop-shadow-lg" />
                     </div>
                 </div>
             </div>
@@ -75,28 +45,28 @@ templ CompanyStory() {
     </section>
 }
 
-templ MissionValues() {
+templ MissionValues(webconfig types.WebConfig) {
     <section class="py-16 bg-gray-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-12">
-                <h2 class="text-3xl font-bold mb-4" style="color: #000755;">Our Mission & Values</h2>
-                <p class="text-lg text-gray-600">The principles that drive everything we do</p>
+                <h2 class="text-3xl font-bold mb-4" style="color: #000755;">{ webconfig.Translations["about.mission_heading"] }</h2>
+                <p class="text-lg text-gray-600">{ webconfig.Translations["about.mission_subheading"] }</p>
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 @ValueCard(
-                    "Exclusive Partnerships",
-                    "We maintain strategic import partnerships with world-leading manufacturers, ensuring access to premium OEM-quality parts and competitive pricing.",
+                    webconfig.Translations["about.value_1_title"],
+                    webconfig.Translations["about.value_1_desc"],
                     "M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z",
                 )
                 @ValueCard(
-                    "Import Excellence",
-                    "Our specialized import operations and logistics expertise ensure reliable supply chains and exceptional product availability for our customers.",
+                    webconfig.Translations["about.value_2_title"],
+                    webconfig.Translations["about.value_2_desc"],
                     "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z",
                 )
                 @ValueCard(
-                    "Market Leadership",
-                    "We continuously expand our brand portfolio and strengthen international relationships to offer the latest innovations in automotive technology.",
+                    webconfig.Translations["about.value_3_title"],
+                    webconfig.Translations["about.value_3_desc"],
                     "M13 10V3L4 14h7v7l9-11h-7z",
                 )
             </div>
@@ -116,18 +86,30 @@ templ ValueCard(title, description, iconPath string) {
     </div>
 }
 
-templ TeamSection() {
+templ TeamSection(webconfig types.WebConfig) {
     <section class="py-16 bg-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-12">
-                <h2 class="text-3xl font-bold mb-4" style="color: #000755;">Meet Our Team</h2>
-                <p class="text-lg text-gray-600">Import specialists and partnership experts driving Alfashop's success</p>
+                <h2 class="text-3xl font-bold mb-4" style="color: #000755;">{ webconfig.Translations["about.team_heading"] }</h2>
+                <p class="text-lg text-gray-600">{ webconfig.Translations["about.team_subheading"] }</p>
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                @TeamMember("Alex Rodriguez", "Founder & CEO", "With over 30 years in automotive import business, Alex established Alfashop's exclusive brand partnerships and strategic market positioning.")
-                @TeamMember("Sarah Chen", "Chief Import Operations", "Sarah manages our international supplier relationships and import logistics, ensuring seamless delivery of premium automotive parts.")
-                @TeamMember("Mike Johnson", "Brand Partnership Director", "Mike develops and maintains exclusive agreements with leading automotive manufacturers, expanding our premium product portfolio.")
+                @TeamMember(
+                    webconfig.Translations["about.team_1_name"],
+                    webconfig.Translations["about.team_1_position"],
+                    webconfig.Translations["about.team_1_desc"],
+                )
+                @TeamMember(
+                    webconfig.Translations["about.team_2_name"],
+                    webconfig.Translations["about.team_2_position"],
+                    webconfig.Translations["about.team_2_desc"],
+                )
+                @TeamMember(
+                    webconfig.Translations["about.team_3_name"],
+                    webconfig.Translations["about.team_3_position"],
+                    webconfig.Translations["about.team_3_desc"],
+                )
             </div>
         </div>
     </section>
@@ -146,19 +128,19 @@ templ TeamMember(name, position, description string) {
     </div>
 }
 
-templ StatsSection() {
+templ StatsSection(webconfig types.WebConfig) {
     <section class="py-16 bg-gray-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-12">
-                <h2 class="text-3xl font-bold mb-4" style="color: #000755;">Alfashop by the Numbers</h2>
-                <p class="text-lg text-gray-600">Our commitment to excellence shows in our results</p>
+                <h2 class="text-3xl font-bold mb-4" style="color: #000755;">{ webconfig.Translations["about.stats_heading"] }</h2>
+                <p class="text-lg text-gray-600">{ webconfig.Translations["about.stats_subheading"] }</p>
             </div>
             
             <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
-                @StatCard("50,000+", "Products Available")
-                @StatCard("250,000+", "Happy Customers")
-                @StatCard("99.5%", "Customer Satisfaction")
-                @StatCard("28 Years", "In Business")
+                @StatCard("50,000+", webconfig.Translations["about.stats_products"])
+                @StatCard("250,000+", webconfig.Translations["about.stats_customers"])
+                @StatCard("99.5%", webconfig.Translations["about.stats_satisfaction"])
+                @StatCard("28 Years", webconfig.Translations["about.stats_years"])
             </div>
         </div>
     </section>

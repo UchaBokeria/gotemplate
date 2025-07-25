@@ -2,31 +2,22 @@ package pages
 
 import (
 	"main/web/app/types"
-	"main/web/app/view" 
-	"main/web/app/view/components"
 )
 
 templ Auth(webconfig types.WebConfig) {
-    @view.Index(webconfig) {
-        @components.Navigation()
-        
-        <main class="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-            <div class="max-w-md w-full space-y-8">
-                @AuthCard()
-            </div>
-        </main>
-    }
+    <div class="max-w-md w-full space-y-8">
+        @AuthCard(webconfig)
+    </div>
 }
 
-templ AuthCard() {
+templ AuthCard(webconfig types.WebConfig) {
     <div class="bg-white rounded-xl shadow-lg p-8" x-data="{ activeTab: 'login' }">
-        <!-- Logo and Header -->
         <div class="text-center mb-8">
             <div class="w-20 h-20 mx-auto rounded-2xl flex items-center justify-center shadow-xl mb-6 overflow-hidden transition-transform duration-200 hover:scale-105" style="background: linear-gradient(135deg, #f4cc1d 0%, #e6b800 100%); border: 3px solid rgba(0, 7, 85, 0.1);">
                 <img src="/assets/images/logo.png" alt="Alfashop Logo" class="w-16 h-16 object-contain filter drop-shadow-md" />
             </div>
-            <h2 class="text-3xl font-bold tracking-tight" style="color: #000755;">Welcome to Alfashop</h2>
-            <p class="text-gray-600 mt-2 font-medium">Your trusted exclusive auto parts partner</p>
+            <h2 class="text-3xl font-bold tracking-tight" style="color: #000755;">{ webconfig.Translations["auth.welcome_title"] }</h2>
+            <p class="text-gray-600 mt-2 font-medium">{ webconfig.Translations["auth.tagline"] }</p>
         </div>
 
         <!-- Tab Navigation -->
@@ -37,7 +28,7 @@ templ AuthCard() {
                 class="flex-1 py-2 px-4 text-center font-medium text-sm rounded-md transition-all duration-200"
                 :style="activeTab === 'login' ? 'background-color: #f4cc1d; color: #000755;' : ''"
             >
-                Login
+                { webconfig.Translations["auth.login"] }
             </button>
             <button 
                 @click="activeTab = 'register'" 
@@ -45,7 +36,7 @@ templ AuthCard() {
                 class="flex-1 py-2 px-4 text-center font-medium text-sm rounded-md transition-all duration-200"
                 :style="activeTab === 'register' ? 'background-color: #f4cc1d; color: #000755;' : ''"
             >
-                Register
+                { webconfig.Translations["auth.register"] }
             </button>
         </div>
 
@@ -58,7 +49,7 @@ templ AuthCard() {
                 class="space-y-6"
             >
                 <div>
-                    <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+                    <label for="email" class="block text-sm font-medium text-gray-700">{ webconfig.Translations["auth.email"] }</label>
                     <input 
                         id="email" 
                         name="Email" 
@@ -69,7 +60,7 @@ templ AuthCard() {
                 </div>
                 
                 <div>
-                    <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+                    <label for="password" class="block text-sm font-medium text-gray-700">{ webconfig.Translations["auth.password"] }</label>
                     <input 
                         id="password" 
                         name="Password" 
@@ -86,7 +77,7 @@ templ AuthCard() {
                         type="checkbox" 
                         class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                     />
-                    <label for="remember-me" class="ml-2 block text-sm text-gray-900">Remember me</label>
+                    <label for="remember-me" class="ml-2 block text-sm text-gray-900">{ webconfig.Translations["auth.remember_me"] }</label>
                 </div>
                 
                 <button 
@@ -94,7 +85,7 @@ templ AuthCard() {
                     class="w-full py-3 px-4 text-blue-900 font-semibold rounded-md shadow-sm hover:shadow-md transition-all duration-200 hover:scale-105"
                     style="background-color: #f4cc1d; color: #000755;"
                 >
-                    Sign In
+                    { webconfig.Translations["auth.sign_in"] }
                 </button>
             </form>
         </div>
@@ -108,7 +99,7 @@ templ AuthCard() {
                 class="space-y-6"
             >
                 <div>
-                    <label for="register-email" class="block text-sm font-medium text-gray-700">Email</label>
+                    <label for="register-email" class="block text-sm font-medium text-gray-700">{ webconfig.Translations["auth.email"] }</label>
                     <input 
                         id="register-email" 
                         name="Email" 
@@ -119,7 +110,7 @@ templ AuthCard() {
                 </div>
                 
                 <div>
-                    <label for="register-password" class="block text-sm font-medium text-gray-700">Password</label>
+                    <label for="register-password" class="block text-sm font-medium text-gray-700">{ webconfig.Translations["auth.password"] }</label>
                     <input 
                         id="register-password" 
                         name="Password" 
@@ -130,7 +121,7 @@ templ AuthCard() {
                 </div>
                 
                 <div>
-                    <label for="confirm-password" class="block text-sm font-medium text-gray-700">Confirm Password</label>
+                    <label for="confirm-password" class="block text-sm font-medium text-gray-700">{ webconfig.Translations["auth.confirm_password"] }</label>
                     <input 
                         id="confirm-password" 
                         name="ConfirmPassword" 
@@ -149,7 +140,7 @@ templ AuthCard() {
                         style="accent-color: #f4cc1d;"
                     />
                     <label for="terms" class="ml-2 block text-sm text-gray-700">
-                        I agree to the <a href="#" class="hover:underline" style="color: #000755;">Terms and Conditions</a>
+                        { webconfig.Translations["auth.terms_agreement"] } <a href="#" class="hover:underline" style="color: #000755;">{ webconfig.Translations["auth.terms_and_conditions"] }</a>
                     </label>
                 </div>
                 
@@ -160,7 +151,7 @@ templ AuthCard() {
                     class="w-full py-3 px-4 text-blue-900 font-semibold rounded-md shadow-sm hover:shadow-md transition-all duration-200 hover:scale-105"
                     style="background-color: #f4cc1d; color: #000755;"
                 >
-                    Create Account
+                    { webconfig.Translations["auth.create_account"] }
                 </button>
             </form>
         </div>
@@ -168,7 +159,7 @@ templ AuthCard() {
         <!-- Additional Info -->
         <div class="mt-8 text-center">
             <p class="text-sm text-gray-600">
-                Need help? <a href="/about" class="hover:underline" style="color: #000755;">Contact our support team</a>
+                { webconfig.Translations["auth.need_help"] } <a href="/about" class="hover:underline" style="color: #000755;">{ webconfig.Translations["auth.contact_support"] }</a>
             </p>
         </div>
     </div>
@@ -182,7 +173,7 @@ templ AuthCard() {
             const rememberMe = formData.get('remember') === 'on';
             
             if (!email || !password) {
-                alert('Please fill in all fields');
+                alert('{ webconfig.Translations["auth.fill_all_fields"] }');
                 return;
             }
             
@@ -196,17 +187,17 @@ templ AuthCard() {
             const confirmPassword = formData.get('confirm_password');
             
             if (!email || !password || !confirmPassword) {
-                alert('Please fill in all fields');
+                alert('{ webconfig.Translations["auth.fill_all_fields"] }');
                 return;
             }
             
             if (password !== confirmPassword) {
-                alert('Passwords do not match!');
+                alert('{ webconfig.Translations["auth.passwords_dont_match_alert"] }');
                 return;
             }
             
-            console.log('Registration attempt:', { email, password });
-            alert('Registration successful! Please login with your credentials.');
+            console.log('{ webconfig.Translations["auth.registration_attempt"] }', { email, password });
+            alert('{ webconfig.Translations["auth.registration_success_alert"] }');
         }
     </script>
 }

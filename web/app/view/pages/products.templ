@@ -2,76 +2,67 @@ package pages
 
 import (
 	"main/web/app/types"
-	"main/web/app/view"
-	"main/web/app/view/components"
 )
 
 templ Products(webconfig types.WebConfig) {
-    @view.Index(webconfig) {
-        @components.Navigation()
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold mb-2" style="color: #000755;">{webconfig.Translations["products.premium_auto_parts"]}</h1>
+            <p class="text-gray-600">{webconfig.Translations["products.exclusive_imported"]}</p>
+        </div>
         
-        <main class="min-h-screen bg-gray-50">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <!-- Page Header -->
-                <div class="mb-8">
-                    <h1 class="text-3xl font-bold mb-2" style="color: #000755;">Premium Auto Parts & Filters</h1>
-                    <p class="text-gray-600">Exclusively imported premium automotive parts from world-leading manufacturers</p>
-                </div>
-                
-                <div class="lg:grid lg:grid-cols-4 lg:gap-8" x-data="productStore()">
-                    <!-- Filters Sidebar -->
-                    <div class="lg:col-span-1">
-                        @FilterSidebar()
-                    </div>
-                    
-                    <!-- Products Grid -->
-                    <div class="lg:col-span-3 mt-8 lg:mt-0">
-                        @ProductsHeader()
-                        @ProductsGrid()
-                    </div>
-                </div>
+        <div class="lg:grid lg:grid-cols-4 lg:gap-8" x-data="productStore()">
+            <!-- Filters Sidebar -->
+            <div class="lg:col-span-1">
+                @FilterSidebar(webconfig)
             </div>
-        </main>
-    }
+            
+            <!-- Products Grid -->
+            <div class="lg:col-span-3 mt-8 lg:mt-0">
+                @ProductsHeader(webconfig)
+                @ProductsGrid(webconfig)
+            </div>
+        </div>
+    </div>
 }
 
-templ FilterSidebar() {
+templ FilterSidebar(webconfig types.WebConfig) {
     <div class="bg-white rounded-lg shadow-sm p-6 sticky top-24">
-        <h3 class="text-lg font-semibold mb-4" style="color: #000755;">Filters</h3>
+        <h3 class="text-lg font-semibold mb-4" style="color: #000755;">{webconfig.Translations["products.filters"]}</h3>
         
         <!-- Search -->
         <div class="mb-6">
-            <label for="search" class="block text-sm font-medium text-gray-700 mb-2">Search Parts</label>
+            <label for="search" class="block text-sm font-medium text-gray-700 mb-2">{webconfig.Translations["products.search_parts"]}</label>
             <input 
                 type="text" 
                 id="search" 
                 x-model="filters.search"
                 @input.debounce.500ms="applyFilters()"
-                placeholder="Search by part name or number..."
+                placeholder={webconfig.Translations["products.search_placeholder"]}
                 class="w-full px-3 py-2 border border-gray-300 rounded-md form-input focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent"
             />
         </div>
         
         <!-- Categories -->
         <div class="mb-6">
-            <h4 class="font-medium text-gray-900 mb-3">Categories</h4>
+            <h4 class="font-medium text-gray-900 mb-3">{webconfig.Translations["products.categories"]}</h4>
             <div class="space-y-2" 
                  hx-get="/products/categories"
                  hx-trigger="load"
                  hx-target="this"
                  hx-swap="innerHTML">
                 <!-- Loading categories... -->
-                <div class="text-sm text-gray-500">Loading categories...</div>
+                <div class="text-sm text-gray-500">{webconfig.Translations["products.loading_categories"]}</div>
             </div>
         </div>
         
         <!-- Price Range -->
         <div class="mb-6">
-            <h4 class="font-medium text-gray-900 mb-3">Price Range</h4>
+            <h4 class="font-medium text-gray-900 mb-3">{webconfig.Translations["products.price_range"]}</h4>
             <div class="space-y-2">
                 <label class="flex items-center">
                     <input type="radio" x-model="filters.priceRange" value="" @change="applyFilters()" name="price" class="text-yellow-500 focus:ring-yellow-500" style="accent-color: #f4cc1d;" />
-                    <span class="ml-2 text-sm text-gray-700">All Prices</span>
+                    <span class="ml-2 text-sm text-gray-700">{webconfig.Translations["products.all_prices"]}</span>
                 </label>
                 <label class="flex items-center">
                     <input type="radio" x-model="filters.priceRange" value="0-25" @change="applyFilters()" name="price" class="text-yellow-500 focus:ring-yellow-500" style="accent-color: #f4cc1d;" />
@@ -97,25 +88,25 @@ templ FilterSidebar() {
             @click="clearFilters()"
             class="w-full px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
         >
-            Clear All Filters
+            {webconfig.Translations["products.clear_all_filters"]}
         </button>
     </div>
 }
 
-templ ProductsHeader() {
+templ ProductsHeader(webconfig types.WebConfig) {
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
         <div class="mb-4 sm:mb-0">
-            <p class="text-sm text-gray-600" x-text="`Showing ${totalCount} results`">Loading...</p>
+            <p class="text-sm text-gray-600" x-text="`Showing ${totalCount} results`">{webconfig.Translations["products.loading"]}</p>
         </div>
         
         <div class="flex items-center space-x-4">
             <!-- Sort Dropdown -->
             <div class="relative">
                 <select x-model="sortBy" @change="applyFilters()" class="px-3 py-2 border border-gray-300 rounded-md form-input focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-transparent">
-                    <option value="newest">Newest First</option>
-                    <option value="name">Sort by Name</option>
-                    <option value="price-low">Price: Low to High</option>
-                    <option value="price-high">Price: High to Low</option>
+                    <option value="newest">{webconfig.Translations["products.newest_first"]}</option>
+                    <option value="name">{webconfig.Translations["products.sort_by_name"]}</option>
+                    <option value="price-low">{webconfig.Translations["products.price_low_to_high"]}</option>
+                    <option value="price-high">{webconfig.Translations["products.price_high_to_low"]}</option>
                 </select>
             </div>
             
@@ -146,7 +137,7 @@ templ ProductsHeader() {
     </div>
 }
 
-templ ProductsGrid() {
+templ ProductsGrid(webconfig types.WebConfig) {
     <div>
         <!-- Products Container -->
         <div 
@@ -175,7 +166,7 @@ templ ProductsGrid() {
         
         <!-- End of Results -->
         <div x-show="!hasMore && products.length > 0" class="text-center py-8">
-            <p class="text-gray-500">You've reached the end of results</p>
+            <p class="text-gray-500">{webconfig.Translations["products.end_of_results"]}</p>
         </div>
     </div>
 

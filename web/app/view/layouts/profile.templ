@@ -1,6 +1,10 @@
 package layouts
 
-templ Profile() {
+import (
+	"main/web/app/types"
+)
+
+templ Profile(webconfig types.WebConfig) {
     <div class="w-full">
         <h1>Profile</h1>
         { children... }

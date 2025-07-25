@@ -1,13 +1,17 @@
 package components
 
-templ Navigation() {
+import (
+	"main/web/app/types"
+)
+
+templ Navigation(webconfig types.WebConfig) {
     <nav class="bg-white shadow-lg sticky top-0 z-50" x-data="navigationData()" x-init="loadLanguages(); loadTranslations(currentLang)">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
                 <!-- Logo -->
                 <div class="flex-shrink-0">
                     <a href="/" class="flex items-center">
-                        <img src="/assets/images/logo.png" alt="Alfashop Logo" class="w-16 h-16 object-contain" />
+                        <img src="/assets/images/logo.png" alt={ webconfig.Translations["nav.logo_alt"] } class="w-16 h-16 object-contain" />
                     </a>
                 </div>
 
@@ -15,13 +19,13 @@ templ Navigation() {
                 <div class="hidden md:block">
                     <div class="ml-10 flex items-baseline space-x-8">
                         <a href="/" class="text-blue-900 hover:text-yellow-500 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200" style="color: #000755;">
-                            <span x-text="getTranslation('nav.home', 'Home')"></span>
+                            { webconfig.Translations["nav.home"] }
                         </a>
                         <a href="/products" class="text-blue-900 hover:text-yellow-500 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200" style="color: #000755;">
-                            <span x-text="getTranslation('nav.products', 'Auto Parts')"></span>
+                            { webconfig.Translations["nav.products"] }
                         </a>
                         <a href="/about" class="text-blue-900 hover:text-yellow-500 px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200" style="color: #000755;">
-                            <span x-text="getTranslation('nav.about', 'About Us')"></span>
+                            { webconfig.Translations["nav.about"] }
                         </a>
                     </div>
                 </div>
@@ -52,10 +56,10 @@ templ Navigation() {
 
                     <!-- Auth Buttons -->
                     <a href="/login" class="text-blue-900 hover:text-yellow-500 px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200" style="color: #000755;">
-                        <span x-text="getTranslation('nav.login', 'Login')"></span>
+                        { webconfig.Translations["nav.login"] }
                     </a>
                     <a href="/register" class="bg-yellow-500 hover:bg-yellow-600 text-blue-900 px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 shadow-md hover:shadow-lg" style="background-color: #f4cc1d; color: #000755;">
-                        <span x-text="getTranslation('nav.register', 'Register')"></span>
+                        { webconfig.Translations["nav.register"] }
                     </a>
                 </div>
 
@@ -75,18 +79,18 @@ templ Navigation() {
         <div x-show="mobileMenuOpen" x-transition class="md:hidden">
             <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t">
                 <a href="/" class="text-blue-900 hover:text-yellow-500 block px-3 py-2 rounded-md text-base font-medium" style="color: #000755;">
-                    <span x-text="getTranslation('nav.home', 'Home')"></span>
+                    { webconfig.Translations["nav.home"] }
                 </a>
                 <a href="/products" class="text-blue-900 hover:text-yellow-500 block px-3 py-2 rounded-md text-base font-medium" style="color: #000755;">
-                    <span x-text="getTranslation('nav.products', 'Auto Parts')"></span>
+                    { webconfig.Translations["nav.products"] }
                 </a>
                 <a href="/about" class="text-blue-900 hover:text-yellow-500 block px-3 py-2 rounded-md text-base font-medium" style="color: #000755;">
-                    <span x-text="getTranslation('nav.about', 'About Us')"></span>
+                    { webconfig.Translations["nav.about"] }
                 </a>
                 
                 <div class="border-t pt-3 mt-3">
                     <div class="flex items-center space-x-2 px-3 py-2">
-                        <span class="text-sm text-gray-600" x-text="getTranslation('nav.language', 'Language')">Language:</span>
+                        <span class="text-sm text-gray-600">{ webconfig.Translations["nav.language"] }:</span>
                         <select x-model="currentLang" @change="changeLanguage(currentLang)" class="text-sm border rounded px-2 py-1">
                             <template x-for="language in availableLanguages" :key="language">
                                 <option :value="language" x-text="language.toUpperCase()"></option>
@@ -94,10 +98,10 @@ templ Navigation() {
                         </select>
                     </div>
                     <a href="/login" class="text-blue-900 hover:text-yellow-500 block px-3 py-2 rounded-md text-base font-medium" style="color: #000755;">
-                        <span x-text="getTranslation('nav.login', 'Login')"></span>
+                        { webconfig.Translations["nav.login"] }
                     </a>
                     <a href="/register" class="bg-yellow-500 hover:bg-yellow-600 text-blue-900 block px-3 py-2 rounded-md text-base font-medium mx-3 mt-2 text-center" style="background-color: #f4cc1d; color: #000755;">
-                        <span x-text="getTranslation('nav.register', 'Register')"></span>
+                        { webconfig.Translations["nav.register"] }
                     </a>
                 </div>
             </div>
@@ -118,13 +122,7 @@ templ Navigation() {
                     },
 
                     setLanguageHeader(language) {
-                        // Set Accept-Language header for all future requests
-                        document.documentElement.setAttribute('data-lang', language);
-                        
-                        // Update HTMX headers
-                        if (window.htmx) {
-                            // htmx.config.headers['Accept-Language'] = language;
-                        }
+            
                     },
 
                     async loadLanguages() {
@@ -151,6 +149,10 @@ templ Navigation() {
                         document.dispatchEvent(new CustomEvent('language-changed', {
                             detail: { language, translations: this.translations }
                         }));
+                        
+                        // Redirect to update language server-side
+                        const currentPath = window.location.pathname + window.location.search;
+                        window.location.href = `/translate/${language}?redirect=${encodeURIComponent(currentPath)}`;
                     },
 
                     getTranslation(key, fallback) {

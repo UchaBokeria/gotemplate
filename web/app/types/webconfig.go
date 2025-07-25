@@ -8,3 +8,9 @@ type WebConfig struct {
 	Categories   []string
 	Language     string
 }
+
+type WebDto struct {
+	WebConfig
+	Redirect string `query:"redirect"`
+	Lang     string `param:"lang"`
+}

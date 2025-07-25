@@ -5,17 +5,20 @@ import (
 	"main/web/app/view/components"
 )
 
-templ Index(webconfig types.WebConfig) {
+templ Index(webconfig types.WebConfig, page templ.Component) {
 	<!DOCTYPE html>
 	<html lang={webconfig.Language} d="a">
 		<head>
-			@Meta()
 			@Imports()
+			@Meta(webconfig)
 		</head>
 		<body>
-			{ children... }
+        	@components.Navigation(webconfig)
+			<main class="min-h-screen bg-gray-50">
+				@page
+			</main>
 			@components.Footer(webconfig)
-			@components.CartWidget()
+			@components.CartWidget(webconfig)
 		</body>
 	</html>
 }

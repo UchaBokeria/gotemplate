@@ -14,7 +14,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func list(ctx *controller.Context[any], listDto *dtos.ProductListDto) error {
+func list(ctx *controller.Context, listDto *dtos.ProductListDto) error {
 	var products []models.Product
 	var total int64
 
@@ -54,7 +54,7 @@ func list(ctx *controller.Context[any], listDto *dtos.ProductListDto) error {
 	return ctx.Html(components.ProductsTable(products))
 }
 
-func show(ctx *controller.Context[any], idDto *dto.ByID) error {
+func show(ctx *controller.Context, idDto *dto.ByID) error {
 	var product models.Product
 
 	if err := storage.DB.First(&product, idDto.ID).Error; err != nil {
@@ -68,7 +68,7 @@ func show(ctx *controller.Context[any], idDto *dto.ByID) error {
 		product.Name, product.Category, product.Price, product.Stock, product.Status))
 }
 
-func create(ctx *controller.Context[any], createDto *dtos.CreateProductDto) error {
+func create(ctx *controller.Context, createDto *dtos.CreateProductDto) error {
 	product := models.Product{
 		Name:        createDto.Name,
 		Category:    createDto.Category,
@@ -87,7 +87,7 @@ func create(ctx *controller.Context[any], createDto *dtos.CreateProductDto) erro
 	return ctx.Html(components.ProductsTable(products))
 }
 
-func update(ctx *controller.Context[any], updateDto *dtos.UpdateProductDto) error {
+func update(ctx *controller.Context, updateDto *dtos.UpdateProductDto) error {
 	var product models.Product
 
 	if err := storage.DB.First(&product, updateDto.ID).Error; err != nil {
@@ -113,7 +113,7 @@ func update(ctx *controller.Context[any], updateDto *dtos.UpdateProductDto) erro
 	return ctx.Html(components.ProductsTable(products))
 }
 
-func deleteProduct(ctx *controller.Context[any], deleteDto *dto.ByID) error {
+func deleteProduct(ctx *controller.Context, deleteDto *dto.ByID) error {
 	var product models.Product
 
 	if err := storage.DB.First(&product, deleteDto.ID).Error; err != nil {

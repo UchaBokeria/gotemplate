@@ -11,7 +11,7 @@ import (
 	"github.com/UchaBokeria/goyard/controller"
 )
 
-func Read(ctx *controller.Context[any], dto *dtos.ReadGeneralSettingsDto) error {
+func Read(ctx *controller.Context, dto *dtos.ReadGeneralSettingsDto) error {
 	var settings models.GeneralSettings
 
 	// Get or create general settings (there should be only one record)
@@ -37,7 +37,7 @@ func Read(ctx *controller.Context[any], dto *dtos.ReadGeneralSettingsDto) error 
 	return ctx.Html(components.GeneralSettingsForm(settings))
 }
 
-func Update(ctx *controller.Context[any], dto *dtos.UpdateGeneralSettingsDto) error {
+func Update(ctx *controller.Context, dto *dtos.UpdateGeneralSettingsDto) error {
 
 	var settings models.GeneralSettings
 

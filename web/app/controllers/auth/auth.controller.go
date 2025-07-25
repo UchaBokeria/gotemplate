@@ -3,6 +3,7 @@ package auth
 import (
 	"main/internal/models"
 	"main/internal/storage"
+	"main/web/app/types"
 	"main/web/app/view/components"
 
 	"github.com/UchaBokeria/goyard/controller"
@@ -20,46 +21,46 @@ type RegisterDto struct {
 	Password string `form:"password"`
 }
 
-func Login(ctx *controller.Context[any], loginData *LoginDto) error {
+func Login(ctx *controller.Context, loginData *LoginDto) error {
 	// Validate input
 	if loginData.Email == "" || loginData.Password == "" {
-		return ctx.Html(components.ProductNotFound())
+		return ctx.Html(components.ProductNotFound(ctx.Get("webconfig").(types.WebConfig)))
 	}
 
 	// Find user by email
 	var user models.Users
 	if err := storage.DB.Where("email = ?", loginData.Email).First(&user).Error; err != nil {
-		return ctx.Html(components.ProductNotFound())
+		return ctx.Html(components.ProductNotFound(ctx.Get("webconfig").(types.WebConfig)))
 	}
 
 	// Check password
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(loginData.Password)); err != nil {
-		return ctx.Html(components.ProductNotFound())
+		return ctx.Html(components.ProductNotFound(ctx.Get("webconfig").(types.WebConfig)))
 	}
 
 	// Set session
 	ctx.Set("user_id", user.ID)
 	ctx.Set("user_email", user.Email)
 
-	return ctx.Html(components.ProductNotFound())
+	return ctx.Html(components.ProductNotFound(ctx.Get("webconfig").(types.WebConfig)))
 }
 
-func Register(ctx *controller.Context[any], registerData *RegisterDto) error {
+func Register(ctx *controller.Context, registerData *RegisterDto) error {
 	// Validate input
 	if registerData.Name == "" || registerData.Email == "" || registerData.Password == "" {
-		return ctx.Html(components.ProductNotFound())
+		return ctx.Html(components.ProductNotFound(ctx.Get("webconfig").(types.WebConfig)))
 	}
 
 	// Check if user already exists
 	var existingUser models.Users
 	if err := storage.DB.Where("email = ?", registerData.Email).First(&existingUser).Error; err == nil {
-		return ctx.Html(components.ProductNotFound())
+		return ctx.Html(components.ProductNotFound(ctx.Get("webconfig").(types.WebConfig)))
 	}
 
 	// Hash password
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(registerData.Password), bcrypt.DefaultCost)
 	if err != nil {
-		return ctx.Html(components.ProductNotFound())
+		return ctx.Html(components.ProductNotFound(ctx.Get("webconfig").(types.WebConfig)))
 	}
 
 	// Create user
@@ -70,20 +71,20 @@ func Register(ctx *controller.Context[any], registerData *RegisterDto) error {
 	}
 
 	if err := storage.DB.Create(&user).Error; err != nil {
-		return ctx.Html(components.ProductNotFound())
+		return ctx.Html(components.ProductNotFound(ctx.Get("webconfig").(types.WebConfig)))
 	}
 
 	// Set session
 	ctx.Set("user_id", user.ID)
 	ctx.Set("user_email", user.Email)
 
-	return ctx.Html(components.ProductNotFound())
+	return ctx.Html(components.ProductNotFound(ctx.Get("webconfig").(types.WebConfig)))
 }
 
-func Logout(ctx *controller.Context[any]) error {
+func Logout(ctx *controller.Context) error {
 	// Clear session
 	ctx.Set("user_id", nil)
 	ctx.Set("user_email", nil)
 
-	return ctx.Html(components.ProductNotFound())
+	return ctx.Html(components.ProductNotFound(ctx.Get("webconfig").(types.WebConfig)))
 }

@@ -2,23 +2,24 @@ package components
 
 import (
 	"main/internal/models"
+	"main/web/app/types"
 	"fmt"
 	"strconv"
 )
 
-templ ProductsGridData(products []models.Product, page int, limit int, totalCount int) {
+templ ProductsGridData(products []models.Product, page int, limit int, totalCount int, webconfig types.WebConfig) {
 	<div class="products-container">
 		if len(products) == 0 {
 			<div class="col-span-full text-center py-12">
 				<svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 7.172V5L8 4z"/>
 				</svg>
-				<p class="text-lg font-medium text-gray-900 mb-2">No products found</p>
-				<p class="text-gray-500">Try adjusting your filters or search terms</p>
+				<p class="text-lg font-medium text-gray-900 mb-2">{ webconfig.Translations["product.no_products_found"] }</p>
+				<p class="text-gray-500">{ webconfig.Translations["product.adjust_filters"] }</p>
 			</div>
 		} else {
 			for _, product := range products {
-				@ProductCard(product)
+				@ProductCard(product, webconfig)
 			}
 		}
 		
@@ -34,7 +35,7 @@ templ ProductsGridData(products []models.Product, page int, limit int, totalCoun
 	</div>
 }
 
-templ ProductCard(product models.Product) {
+templ ProductCard(product models.Product, webconfig types.WebConfig) {
 	<div class="product-card bg-white rounded-lg shadow-sm hover:shadow-lg transition-all duration-300">
 		<!-- Grid View -->
 		<div x-show="viewMode === 'grid'" class="p-6">
@@ -56,7 +57,7 @@ templ ProductCard(product models.Product) {
 							</svg>
 						}
 					</div>
-					<span class="ml-2 text-sm text-gray-600">(5.0)</span>
+					<span class="ml-2 text-sm text-gray-600">{ webconfig.Translations["product.rating"] }</span>
 				</div>
 			</a>
 			<div class="flex items-center justify-between">
@@ -66,7 +67,7 @@ templ ProductCard(product models.Product) {
 					class="px-4 py-2 text-blue-900 font-semibold rounded-md shadow-sm hover:shadow-md transition-all duration-200 hover:scale-105"
 					style="background-color: #f4cc1d; color: #000755;"
 				>
-					Add to Cart
+					{ webconfig.Translations["product.add_to_cart"] }
 				</button>
 			</div>
 		</div>
@@ -91,7 +92,7 @@ templ ProductCard(product models.Product) {
 							</svg>
 						}
 					</div>
-					<span class="text-sm text-gray-600">(5.0 reviews)</span>
+					<span class="text-sm text-gray-600">{ webconfig.Translations["product.rating_reviews"] }</span>
 				</div>
 				<div class="flex items-center justify-between">
 					<span class="text-2xl font-bold" style="color: #f4cc1d;">${ fmt.Sprintf("%.2f", product.Price) }</span>
@@ -100,7 +101,7 @@ templ ProductCard(product models.Product) {
 						class="px-6 py-2 text-blue-900 font-semibold rounded-md shadow-sm hover:shadow-md transition-all duration-200 hover:scale-105"
 						style="background-color: #f4cc1d; color: #000755;"
 					>
-						Add to Cart
+						{ webconfig.Translations["product.add_to_cart"] }
 					</button>
 				</div>
 			</div>
@@ -108,7 +109,7 @@ templ ProductCard(product models.Product) {
 	</div>
 }
 
-templ ProductDetailData(product models.Product, relatedProducts []models.Product) {
+templ ProductDetailData(product models.Product, relatedProducts []models.Product, webconfig types.WebConfig) {
 	<div class="product-detail-data">
 		<script>
 			document.dispatchEvent(new CustomEvent('product-loaded', {
@@ -128,23 +129,23 @@ templ ProductDetailData(product models.Product, relatedProducts []models.Product
 	</div>
 }
 
-templ ProductNotFound() {
+templ ProductNotFound(webconfig types.WebConfig) {
 	<div class="text-center py-16">
 		<svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.447.935-6 2.45"/>
 		</svg>
-		<h3 class="text-lg font-medium text-gray-900 mb-2">Product not found</h3>
-		<p class="text-gray-500 mb-4">The product you're looking for doesn't exist or has been removed.</p>
+		<h3 class="text-lg font-medium text-gray-900 mb-2">{ webconfig.Translations["product.not_found"] }</h3>
+		<p class="text-gray-500 mb-4">{ webconfig.Translations["product.not_found_description"] }</p>
 		<a href="/products" class="inline-block px-4 py-2 rounded-md font-medium text-white" style="background-color: #f4cc1d; color: #000755;">
-			Browse All Products
+			{ webconfig.Translations["product.browse_all"] }
 		</a>
 	</div>
 }
 
-templ CategoriesList(categories []string) {
+templ CategoriesList(categories []string, webconfig types.WebConfig) {
 	<label class="flex items-center">
 		<input type="radio" value="" x-model="filters.category" @change="applyFilters()" class="text-yellow-500 focus:ring-yellow-500" style="accent-color: #f4cc1d;" />
-		<span class="ml-2 text-sm text-gray-700">All Categories</span>
+		<span class="ml-2 text-sm text-gray-700">{ webconfig.Translations["product.all_categories"] }</span>
 	</label>
 	for _, category := range categories {
 		<label class="flex items-center">

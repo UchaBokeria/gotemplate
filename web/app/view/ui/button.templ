@@ -1,6 +1,10 @@
 package ui
 
-templ Button() {
+import (
+	"main/web/app/types"
+)
+
+templ Button(webconfig types.WebConfig) {
     <button class="bg-blue-500 text-white px-4 py-2 rounded-md">
         { children... }
     </button>

@@ -1,44 +1,51 @@
 package controllers
 
 import (
-	Interface "main/web/app/types"
+	"main/internal/types/dto"
 	"main/web/app/view/pages"
+
+	Interface "main/web/app/types"
 
 	"github.com/UchaBokeria/goyard/controller"
 	"github.com/UchaBokeria/goyard/types"
 )
 
-func Pages(web *types.Goyard) {
+func Pages(router *types.Goyard) {
+	router.GET("/translate/:lang", controller.Set[Interface.WebDto](func(ctx *controller.Context, web *Interface.WebDto) error {
+		ctx.WriteCookie(controller.Cookie{Key: "lang", Value: web.Lang, Path: controller.Ptr("/"), MaxAge: controller.Ptr(3600)})
+		return ctx.Redirect(302, web.Redirect)
+	}))
+
 	// Main page routes - all SSR with inline functions
-	web.GET("", controller.Set[any](func(ctx *controller.Context[any]) error {
-		return ctx.Html(pages.Landing(ctx.Get("webconfig").(Interface.WebConfig)))
+	router.GET("", controller.Set[dto.WebConfig](func(ctx *controller.Context, web *dto.WebConfig) error {
+		return ctx.Html(pages.Landing(web.Config))
 	}))
-	web.GET("/", controller.Set[any](func(ctx *controller.Context[any]) error {
-		return ctx.Html(pages.Landing(ctx.Get("webconfig").(Interface.WebConfig)))
+	router.GET("/", controller.Set[dto.WebConfig](func(ctx *controller.Context, web *dto.WebConfig) error {
+		return ctx.Html(pages.Landing(web.Config))
 	}))
-	web.GET("/about", controller.Set[any](func(ctx *controller.Context[any]) error {
-		return ctx.Html(pages.About(ctx.Get("webconfig").(Interface.WebConfig)))
+	router.GET("/about", controller.Set[dto.WebConfig](func(ctx *controller.Context, web *dto.WebConfig) error {
+		return ctx.Html(pages.About(web.Config))
 	}))
-	web.GET("/checkout", controller.Set[any](func(ctx *controller.Context[any]) error {
-		return ctx.Html(pages.Checkout(ctx.Get("webconfig").(Interface.WebConfig)))
+	router.GET("/checkout", controller.Set[dto.WebConfig](func(ctx *controller.Context, web *dto.WebConfig) error {
+		return ctx.Html(pages.Checkout(web.Config))
 	}))
 
 	// Products pages - just render the page, HTMX will handle data loading
-	web.GET("/products", controller.Set[any](func(ctx *controller.Context[any]) error {
-		return ctx.Html(pages.Products(ctx.Get("webconfig").(Interface.WebConfig)))
+	router.GET("/products", controller.Set[dto.WebConfig](func(ctx *controller.Context, web *dto.WebConfig) error {
+		return ctx.Html(pages.Products(web.Config))
 	}))
-	web.GET("/products/:id", controller.Set[any](func(ctx *controller.Context[any]) error {
-		return ctx.Html(pages.ProductDetail(ctx.Get("webconfig").(Interface.WebConfig)))
+	router.GET("/products/:id", controller.Set[dto.WebConfig](func(ctx *controller.Context, web *dto.WebConfig) error {
+		return ctx.Html(pages.ProductDetail(web.Config))
 	}))
 
 	// Auth pages
-	web.GET("/login", controller.Set[any](func(ctx *controller.Context[any]) error {
-		return ctx.Html(pages.Auth(ctx.Get("webconfig").(Interface.WebConfig)))
+	router.GET("/login", controller.Set[dto.WebConfig](func(ctx *controller.Context, web *dto.WebConfig) error {
+		return ctx.Html(pages.Auth(web.Config))
 	}))
-	web.GET("/register", controller.Set[any](func(ctx *controller.Context[any]) error {
-		return ctx.Html(pages.Auth(ctx.Get("webconfig").(Interface.WebConfig)))
+	router.GET("/register", controller.Set[dto.WebConfig](func(ctx *controller.Context, web *dto.WebConfig) error {
+		return ctx.Html(pages.Auth(web.Config))
 	}))
-	web.GET("/forgot-password", controller.Set[any](func(ctx *controller.Context[any]) error {
-		return ctx.Html(pages.ForgotPassword(ctx.Get("webconfig").(Interface.WebConfig)))
+	router.GET("/forgot-password", controller.Set[dto.WebConfig](func(ctx *controller.Context, web *dto.WebConfig) error {
+		return ctx.Html(pages.ForgotPassword(web.Config))
 	}))
 }

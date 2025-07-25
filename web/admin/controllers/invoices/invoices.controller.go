@@ -15,7 +15,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func list(ctx *controller.Context[any], listDto *dtos.InvoiceListDto) error {
+func list(ctx *controller.Context, listDto *dtos.InvoiceListDto) error {
 	var invoices []models.Invoice
 	var total int64
 
@@ -74,7 +74,7 @@ func list(ctx *controller.Context[any], listDto *dtos.InvoiceListDto) error {
 	return ctx.Html(components.InvoicesTable(invoices))
 }
 
-func show(ctx *controller.Context[any], showDto *dto.ByID) error {
+func show(ctx *controller.Context, showDto *dto.ByID) error {
 	var invoice models.Invoice
 
 	if err := storage.DB.First(&invoice, showDto.ID).Error; err != nil {
@@ -88,7 +88,7 @@ func show(ctx *controller.Context[any], showDto *dto.ByID) error {
 		invoice.InvoiceNumber, invoice.OrderID, invoice.CustomerName, invoice.Amount, invoice.Status))
 }
 
-func deleteInvoice(ctx *controller.Context[any], deleteDto *dto.ByID) error {
+func deleteInvoice(ctx *controller.Context, deleteDto *dto.ByID) error {
 	var invoice models.Invoice
 
 	if err := storage.DB.First(&invoice, deleteDto.ID).Error; err != nil {

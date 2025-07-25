@@ -16,7 +16,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func list(ctx *controller.Context[any], listDto *dtos.OrderListDto) error {
+func list(ctx *controller.Context, listDto *dtos.OrderListDto) error {
 	var orders []models.Order
 	var total int64
 
@@ -105,7 +105,7 @@ func list(ctx *controller.Context[any], listDto *dtos.OrderListDto) error {
 	return ctx.Html(components.OrdersTable(orders))
 }
 
-func show(ctx *controller.Context[any], showDto *dto.ByID) error {
+func show(ctx *controller.Context, showDto *dto.ByID) error {
 	var order models.Order
 
 	if err := storage.DB.First(&order, showDto.ID).Error; err != nil {
@@ -119,7 +119,7 @@ func show(ctx *controller.Context[any], showDto *dto.ByID) error {
 		order.OrderNumber, order.CustomerName, order.CustomerEmail, order.Total, order.Status, order.Items, order.Date.Format("2006-01-02")))
 }
 
-func deleteOrder(ctx *controller.Context[any], deleteDto *dto.ByID) error {
+func deleteOrder(ctx *controller.Context, deleteDto *dto.ByID) error {
 	var order models.Order
 
 	if err := storage.DB.First(&order, deleteDto.ID).Error; err != nil {
