@@ -43,7 +43,7 @@ migrate:
 
 .PHONY: drop
 drop:
-	go run ./cmd/databases/postgres/migrate/drop/main.go
+	go run ./cmd/databases/postgres/drop/main.go
 
 .PHONY: seed
 seed:

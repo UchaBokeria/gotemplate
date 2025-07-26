@@ -23,8 +23,8 @@ func ProductsList(ctx *controller.Context, filters *dtos.ProductFilterDto) error
 		limit = filters.Limit
 	}
 
-	// Build query
-	query := storage.DB.Model(&models.Product{}).Where("status = ?", "active")
+	// Build query with category relationships preloaded
+	query := storage.DB.Model(&models.Product{}).Preload("Categories").Where("status = ?", "active")
 
 	// Search filter
 	if filters.Search != "" {
@@ -32,9 +32,11 @@ func ProductsList(ctx *controller.Context, filters *dtos.ProductFilterDto) error
 		query = query.Where("name ILIKE ? OR description ILIKE ?", searchTerm, searchTerm)
 	}
 
-	// Category filter
-	if filters.Category != "" {
-		query = query.Where("category = ?", filters.Category)
+	// Category filter - now using category IDs with many-to-many relationship
+	if len(filters.CategoryIDs) > 0 {
+		query = query.Joins("JOIN product_categories ON products.id = product_categories.product_id").
+			Where("product_categories.category_id IN ?", filters.CategoryIDs).
+			Distinct()
 	}
 
 	// Price range filters
@@ -95,24 +97,40 @@ func ProductDetailApp(ctx *controller.Context) error {
 	}
 
 	var product models.Product
-	if err := storage.DB.First(&product, productID).Error; err != nil {
+	if err := storage.DB.Preload("Categories").First(&product, productID).Error; err != nil {
 		return ctx.Html(components.ProductNotFound(ctx.Get("webconfig").(types.WebConfig)))
 	}
 
-	// Get related products (same category, excluding current product)
+	// Get related products (same categories, excluding current product)
 	var relatedProducts []models.Product
-	storage.DB.Where("category = ? AND id != ? AND status = ?", product.Category, product.ID, "active").
-		Order("created_at DESC").Limit(4).Find(&relatedProducts)
+	if len(product.Categories) > 0 {
+		// Get category IDs from the current product
+		categoryIDs := make([]uint, len(product.Categories))
+		for i, cat := range product.Categories {
+			categoryIDs[i] = cat.ID
+		}
+		
+		// Find products with same categories
+		storage.DB.Preload("Categories").
+			Joins("JOIN product_categories ON products.id = product_categories.product_id").
+			Where("product_categories.category_id IN ? AND products.id != ? AND products.status = ?", 
+				categoryIDs, product.ID, "active").
+			Distinct().Order("created_at DESC").Limit(4).Find(&relatedProducts)
+	}
 
 	return ctx.Html(components.ProductDetailData(product, relatedProducts, ctx.Get("webconfig").(types.WebConfig)))
 }
 
 func ProductsCategories(ctx *controller.Context) error {
-	var categories []string
-	if err := storage.DB.Model(&models.Product{}).
-		Where("status = ?", "active").
-		Distinct("category").
-		Pluck("category", &categories).Error; err != nil {
+	// Get active categories that have products
+	var categories []models.Category
+	if err := storage.DB.
+		Joins("JOIN product_categories ON categories.id = product_categories.category_id").
+		Joins("JOIN products ON product_categories.product_id = products.id").
+		Where("products.status = ? AND categories.is_active = ?", "active", true).
+		Distinct().
+		Order("categories.level ASC, categories.sort_order ASC, categories.name ASC").
+		Find(&categories).Error; err != nil {
 		return ctx.Html(components.ProductNotFound(ctx.Get("webconfig").(types.WebConfig)))
 	}
 

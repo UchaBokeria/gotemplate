@@ -183,7 +183,7 @@ templ ProductsGrid(webconfig types.WebConfig) {
                 products: [],
                 filters: {
                     search: '',
-                    category: '',
+                    categoryIds: [],
                     priceRange: ''
                 },
                 
@@ -198,7 +198,9 @@ templ ProductsGrid(webconfig types.WebConfig) {
                     params.append('sort_by', this.sortBy);
                     
                     if (this.filters.search) params.append('search', this.filters.search);
-                    if (this.filters.category) params.append('category', this.filters.category);
+                    if (this.filters.categoryIds && this.filters.categoryIds.length > 0) {
+                        this.filters.categoryIds.forEach(catId => params.append('categoryIds', catId));
+                    }
                     
                     if (this.filters.priceRange) {
                         const [min, max] = this.filters.priceRange.split('-');

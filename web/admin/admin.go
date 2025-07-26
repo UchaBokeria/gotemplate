@@ -2,6 +2,7 @@ package admin
 
 import (
 	"main/web/admin/controllers"
+	"main/web/admin/controllers/categories"
 	"main/web/admin/controllers/invoices"
 	"main/web/admin/controllers/orders"
 	"main/web/admin/controllers/products"
@@ -14,6 +15,7 @@ func New(web *types.Goyard) {
 	router := web.Group("/admin")
 
 	controllers.Pages(router)
+	categories.New(router)
 	invoices.New(router)
 	orders.New(router)
 	products.New(router)

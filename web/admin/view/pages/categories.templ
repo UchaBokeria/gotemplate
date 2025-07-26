@@ -1,23 +1,534 @@
 package pages
 
-import "main/web/admin/view"
+import (
+	"main/web/admin/view"
+)
 
 templ Categories() {
 	@view.AdminLayout() {
-		<div class="text-center py-12">
-			<svg class="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
-			</svg>
-			<h2 class="text-2xl font-bold text-gray-900 mb-2">Categories Management</h2>
-			<p class="text-gray-500 mb-8">Categories functionality will be implemented soon</p>
-			<div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 max-w-md mx-auto">
-				<div class="flex items-center">
-					<svg class="w-5 h-5 text-yellow-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
-						<path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+		<script>
+			// Categories Management Configuration
+			const categoriesConfig = {
+				// UI State
+				showAddDialog: false,
+				showEditDialog: false,
+				showDeleteDialog: false,
+				isLoading: false,
+				
+				// Data
+				categories: [],
+				editingCategory: null,
+				categoryToDelete: null,
+				
+				// Form Data
+				formData: {
+					name: '',
+					slug: '',
+					description: '',
+					parentId: null,
+					sortOrder: 0,
+					isActive: true
+				},
+				
+				// Filters
+				filters: {
+					search: '',
+					isActive: null
+				},
+
+				// Initialize the component
+				async init() {
+					await this.loadCategories();
+				},
+
+				// Load categories from server
+				async loadCategories() {
+					this.isLoading = true;
+					try {
+						const response = await fetch('/admin/categories/tree');
+						const html = await response.text();
+						document.getElementById('categories-tree-container').innerHTML = html;
+					} catch (error) {
+						console.error('Failed to load categories:', error);
+					}
+					this.isLoading = false;
+				},
+
+				// Apply filters
+				async applyFilters() {
+					const params = new URLSearchParams();
+					if (this.filters.search) params.append('search', this.filters.search);
+					if (this.filters.isActive !== null) params.append('isActive', this.filters.isActive);
+					
+					this.isLoading = true;
+					try {
+						const response = await fetch(`/admin/categories/tree?${params.toString()}`);
+						const html = await response.text();
+						document.getElementById('categories-tree-container').innerHTML = html;
+					} catch (error) {
+						console.error('Failed to apply filters:', error);
+					}
+					this.isLoading = false;
+				},
+
+				// Clear all filters
+				clearFilters() {
+					this.filters.search = '';
+					this.filters.isActive = null;
+					this.applyFilters();
+				},
+
+				// Dialog Management
+				openAddDialog(parentId = null) {
+					this.formData = {
+						name: '',
+						slug: '',
+						description: '',
+						parentId: parentId,
+						sortOrder: 0,
+						isActive: true
+					};
+					this.editingCategory = null;
+					this.showAddDialog = true;
+				},
+
+				openEditDialog(category) {
+					this.formData = {
+						name: category.name,
+						slug: category.slug,
+						description: category.description || '',
+						parentId: category.parentId,
+						sortOrder: category.sortOrder,
+						isActive: category.isActive
+					};
+					this.editingCategory = category;
+					this.showEditDialog = true;
+				},
+
+				openDeleteDialog(category) {
+					this.categoryToDelete = category;
+					this.showDeleteDialog = true;
+				},
+
+				closeDialogs() {
+					this.showAddDialog = false;
+					this.showEditDialog = false;
+					this.showDeleteDialog = false;
+					this.editingCategory = null;
+					this.categoryToDelete = null;
+				},
+
+				// Form Management
+				generateSlug() {
+					if (this.formData.name) {
+						this.formData.slug = this.formData.name
+							.toLowerCase()
+							.replace(/[^a-z0-9\s-]/g, '')
+							.replace(/\s+/g, '-')
+							.replace(/-+/g, '-')
+							.trim('-');
+					}
+				},
+
+				// CRUD Operations
+				async saveCategory() {
+					const isEdit = !!this.editingCategory;
+					const url = isEdit ? `/admin/categories/${this.editingCategory.id}` : '/admin/categories';
+					const method = isEdit ? 'PUT' : 'POST';
+
+					try {
+						const formData = new FormData();
+						if (isEdit) formData.append('id', this.editingCategory.id);
+						formData.append('name', this.formData.name);
+						formData.append('slug', this.formData.slug);
+						formData.append('description', this.formData.description);
+						if (this.formData.parentId) formData.append('parentId', this.formData.parentId);
+						formData.append('sortOrder', this.formData.sortOrder);
+						formData.append('isActive', this.formData.isActive);
+
+						const response = await fetch(url, {
+							method: method,
+							body: formData
+						});
+
+						if (response.ok) {
+							this.closeDialogs();
+							await this.loadCategories();
+						} else {
+							console.error('Failed to save category');
+						}
+					} catch (error) {
+						console.error('Error saving category:', error);
+					}
+				},
+
+				async deleteCategory() {
+					if (!this.categoryToDelete) return;
+
+					try {
+						const response = await fetch(`/admin/categories/${this.categoryToDelete.id}`, {
+							method: 'DELETE'
+						});
+
+						if (response.ok) {
+							this.closeDialogs();
+							await this.loadCategories();
+						} else {
+							console.error('Failed to delete category');
+						}
+					} catch (error) {
+						console.error('Error deleting category:', error);
+					}
+				}
+			}
+
+			// Make config globally available for tree component interactions
+			window.categoriesConfig = categoriesConfig;
+
+			// Global functions for tree interaction
+			window.editCategory = (category) => {
+				categoriesConfig.openEditDialog(category);
+			};
+
+			window.addSubCategory = (parentId) => {
+				categoriesConfig.openAddDialog(parentId);
+			};
+
+			window.deleteCategory = (category) => {
+				categoriesConfig.openDeleteDialog(category);
+			};
+
+			window.toggleCategory = (categoryId) => {
+				const childrenEl = document.getElementById(`children-${categoryId}`);
+				const chevronEl = document.querySelector(`[data-category-id="${categoryId}"] .category-chevron`);
+				
+				if (childrenEl && chevronEl) {
+					const isCurrentlyExpanded = !childrenEl.classList.contains('hidden');
+					
+					if (isCurrentlyExpanded) {
+						childrenEl.classList.add('hidden');
+						chevronEl.style.transform = 'rotate(0deg)';
+					} else {
+						childrenEl.classList.remove('hidden');
+						chevronEl.style.transform = 'rotate(90deg)';
+					}
+				}
+			};
+
+			window.expandAllCategories = () => {
+				setTimeout(() => {
+					document.querySelectorAll('.category-children').forEach(el => {
+						el.classList.remove('hidden');
+					});
+					document.querySelectorAll('.category-chevron').forEach(el => {
+						el.style.transform = 'rotate(90deg)';
+					});
+				}, 100);
+			};
+
+			window.collapseAllCategories = () => {
+				setTimeout(() => {
+					document.querySelectorAll('.category-children').forEach(el => {
+						el.classList.add('hidden');
+					});
+					document.querySelectorAll('.category-chevron').forEach(el => {
+						el.style.transform = 'rotate(0deg)';
+					});
+				}, 100);
+			};
+
+			// Set initial state when tree loads
+			document.addEventListener('htmx:afterSettle', function(evt) {
+				if (evt.detail.target && evt.detail.target.id === 'categories-tree-container') {
+					setTimeout(() => {
+						document.querySelectorAll('.category-chevron').forEach(el => {
+							el.style.transform = 'rotate(90deg)';
+						});
+					}, 50);
+				}
+			});
+		</script>
+
+		<div x-data="categoriesConfig" class="space-y-6">
+			<!-- Header -->
+			<div class="flex items-center justify-between">
+				<div>
+					<h1 class="text-2xl font-bold text-gray-900">Categories Management</h1>
+					<p class="text-gray-600">Organize your products with hierarchical categories</p>
+				</div>
+				<button 
+					@click="openAddDialog()"
+					class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2"
+				>
+					<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
 					</svg>
-					<p class="text-sm text-yellow-800">
-						This page is under development. Please check back later.
-					</p>
+					Add Category
+				</button>
+			</div>
+
+			<!-- Filters -->
+			<div class="bg-white rounded-lg border border-gray-200 p-4">
+				<div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+					<div>
+						<label class="block text-sm font-medium text-gray-700 mb-2">Search</label>
+						<input
+							type="text"
+							x-model="filters.search"
+							@input.debounce.300ms="applyFilters()"
+							placeholder="Search categories..."
+							class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+						/>
+					</div>
+					<div>
+						<label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+						<select 
+							x-model="filters.isActive"
+							@change="applyFilters()"
+							class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+						>
+							<option value="">All</option>
+							<option :value="true">Active</option>
+							<option :value="false">Inactive</option>
+						</select>
+					</div>
+					<div class="flex items-end">
+						<button 
+							@click="clearFilters()"
+							class="px-4 py-2 text-gray-600 hover:text-gray-800 border border-gray-300 rounded-md hover:bg-gray-50"
+						>
+							Clear Filters
+						</button>
+					</div>
+				</div>
+			</div>
+
+			<!-- Categories Tree -->
+			<div class="bg-white rounded-lg border border-gray-200">
+				<div x-show="isLoading" class="flex items-center justify-center py-12">
+					<div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+					<span class="ml-3 text-gray-600">Loading categories...</span>
+				</div>
+				
+				<div 
+					id="categories-tree-container"
+					x-show="!isLoading"
+					class="p-4"
+				>
+					<!-- Tree will be loaded here via HTMX/fetch -->
+				</div>
+			</div>
+
+			<!-- Add Category Dialog -->
+			<div 
+				x-show="showAddDialog"
+				x-transition
+				class="fixed inset-0 z-50 overflow-y-auto"
+				style="display: none;"
+			>
+				<div class="flex items-center justify-center min-h-screen px-4">
+					<div x-show="showAddDialog" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-gray-500 bg-opacity-75"></div>
+					
+					<div x-show="showAddDialog" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" class="relative bg-white rounded-lg max-w-md w-full">
+						<div class="p-6">
+							<h3 class="text-lg font-semibold mb-4">Add New Category</h3>
+							
+							<div class="space-y-4">
+								<div>
+									<label class="block text-sm font-medium text-gray-700 mb-1">Name *</label>
+									<input
+										type="text"
+										x-model="formData.name"
+										@input="generateSlug()"
+										required
+										class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+									/>
+								</div>
+
+								<div>
+									<label class="block text-sm font-medium text-gray-700 mb-1">Slug *</label>
+									<input
+										type="text"
+										x-model="formData.slug"
+										required
+										class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+									/>
+								</div>
+
+								<div>
+									<label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+									<textarea
+										x-model="formData.description"
+										rows="3"
+										class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+									></textarea>
+								</div>
+
+								<div>
+									<label class="block text-sm font-medium text-gray-700 mb-1">Sort Order</label>
+									<input
+										type="number"
+										x-model="formData.sortOrder"
+										min="0"
+										class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+									/>
+								</div>
+
+								<div class="flex items-center">
+									<input
+										type="checkbox"
+										x-model="formData.isActive"
+										class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+									/>
+									<label class="ml-2 block text-sm text-gray-900">Active</label>
+								</div>
+							</div>
+
+							<div class="flex justify-end gap-3 mt-6">
+								<button
+									@click="closeDialogs()"
+									class="px-4 py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50"
+								>
+									Cancel
+								</button>
+								<button
+									@click="saveCategory()"
+									class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+								>
+									Create
+								</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Edit Category Dialog -->
+			<div 
+				x-show="showEditDialog"
+				x-transition
+				class="fixed inset-0 z-50 overflow-y-auto"
+				style="display: none;"
+			>
+				<div class="flex items-center justify-center min-h-screen px-4">
+					<div x-show="showEditDialog" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-gray-500 bg-opacity-75"></div>
+					
+					<div x-show="showEditDialog" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" class="relative bg-white rounded-lg max-w-md w-full">
+						<div class="p-6">
+							<h3 class="text-lg font-semibold mb-4">Edit Category</h3>
+							
+							<div class="space-y-4">
+								<div>
+									<label class="block text-sm font-medium text-gray-700 mb-1">Name *</label>
+									<input
+										type="text"
+										x-model="formData.name"
+										@input="generateSlug()"
+										required
+										class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+									/>
+								</div>
+
+								<div>
+									<label class="block text-sm font-medium text-gray-700 mb-1">Slug *</label>
+									<input
+										type="text"
+										x-model="formData.slug"
+										required
+										class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+									/>
+								</div>
+
+								<div>
+									<label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+									<textarea
+										x-model="formData.description"
+										rows="3"
+										class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+									></textarea>
+								</div>
+
+								<div>
+									<label class="block text-sm font-medium text-gray-700 mb-1">Sort Order</label>
+									<input
+										type="number"
+										x-model="formData.sortOrder"
+										min="0"
+										class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+									/>
+								</div>
+
+								<div class="flex items-center">
+									<input
+										type="checkbox"
+										x-model="formData.isActive"
+										class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+									/>
+									<label class="ml-2 block text-sm text-gray-900">Active</label>
+								</div>
+							</div>
+
+							<div class="flex justify-end gap-3 mt-6">
+								<button
+									@click="closeDialogs()"
+									class="px-4 py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50"
+								>
+									Cancel
+								</button>
+								<button
+									@click="saveCategory()"
+									class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+								>
+									Update
+								</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Delete Confirmation Dialog -->
+			<div 
+				x-show="showDeleteDialog"
+				x-transition
+				class="fixed inset-0 z-50 overflow-y-auto"
+				style="display: none;"
+			>
+				<div class="flex items-center justify-center min-h-screen px-4">
+					<div x-show="showDeleteDialog" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 bg-gray-500 bg-opacity-75"></div>
+					
+					<div x-show="showDeleteDialog" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100" x-transition:leave="ease-in duration-200" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95" class="relative bg-white rounded-lg max-w-md w-full">
+						<div class="p-6">
+							<div class="flex items-center">
+								<div class="flex-shrink-0">
+									<svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"></path>
+									</svg>
+								</div>
+								<div class="ml-3">
+									<h3 class="text-lg font-semibold text-gray-900">Delete Category</h3>
+									<p class="text-gray-600 mt-1">
+										Are you sure you want to delete "<span x-text="categoryToDelete?.name"></span>"? This action cannot be undone.
+									</p>
+								</div>
+							</div>
+
+							<div class="flex justify-end gap-3 mt-6">
+								<button
+									@click="closeDialogs()"
+									class="px-4 py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50"
+								>
+									Cancel
+								</button>
+								<button
+									@click="deleteCategory()"
+									class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+								>
+									Delete
+								</button>
+							</div>
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>

@@ -3,6 +3,8 @@ package components
 import (
 	"main/internal/models"
 	"fmt"
+	"strings"
+	"github.com/UchaBokeria/goyard/pipes"
 )
 
 templ ProductsTable(products []models.Product) {
@@ -36,7 +38,18 @@ templ ProductsTable(products []models.Product) {
 						for _, product := range products {
 							<tr class="hover:bg-gray-50">
 								<td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{ product.Name }</td>
-								<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{ product.Category }</td>
+								<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 max-w-[300px] truncate">
+									if len(product.Categories) > 0 {
+										for i, category := range product.Categories {
+											if i > 0 {
+												<span class="text-gray-300">, </span>
+											}
+											<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800">{ category.Name }</span>
+										}
+									} else {
+										<span class="text-gray-400">No categories</span>
+									}
+								</td>
 								<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${ fmt.Sprintf("%.2f", product.Price) }</td>
 								<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{ fmt.Sprintf("%d", product.Stock) }</td>
 								<td class="px-6 py-4 whitespace-nowrap">
@@ -47,13 +60,13 @@ templ ProductsTable(products []models.Product) {
 								<td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
 									<div class="flex space-x-2">
 										<button 
-											@click={ fmt.Sprintf("editItem({id: %d, name: '%s', category: '%s', price: %.2f, stock: %d, status: '%s', description: '%s'})", product.ID, product.Name, product.Category, product.Price, product.Stock, product.Status, product.Description) }
+											@click={ fmt.Sprintf("editItem({id: %d, name: %q, categories: %s, price: %.2f, stock: %d, status: %q, description: %q})", product.ID, product.Name, pipes.Json(product.Categories), product.Price, product.Stock, product.Status, product.Description) }
 											class="text-blue-600 hover:text-blue-900 text-sm font-medium"
 										>
 											Edit
 										</button>
 										<button 
-											@click={ fmt.Sprintf("deleteItem({id: %d, name: '%s'})", product.ID, product.Name) }
+											@click={ fmt.Sprintf("deleteItem({id: %d, name: %q})", product.ID, product.Name) }
 											class="text-red-600 hover:text-red-900 text-sm font-medium"
 										>
 											Delete
@@ -80,4 +93,17 @@ func getStatusClass(status string) string {
 	default:
 		return "bg-gray-100 text-gray-800"
 	}
+}
+
+func formatCategoryIDs(categories []models.Category) string {
+	if len(categories) == 0 {
+		return "[]"
+	}
+	
+	ids := make([]string, len(categories))
+	for i, cat := range categories {
+		ids[i] = fmt.Sprintf("%d", cat.ID)
+	}
+	fmt.Println("ids", "[" + strings.Join(ids, ",") + "]")
+	return "[" + strings.Join(ids, ",") + "]"
 } 

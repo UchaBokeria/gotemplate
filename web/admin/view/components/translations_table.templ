@@ -3,6 +3,7 @@ package components
 import (
 	"main/internal/models"
 	"fmt"
+	"github.com/UchaBokeria/goyard/pipes"
 )
 
 templ TranslationsTable(translations []models.Translation) {
@@ -32,11 +33,11 @@ templ TranslationsTable(translations []models.Translation) {
 					for _, translation := range translations {
 						<tr class="hover:bg-gray-50">
 							<td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{ translation.Key }</td>
-							<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{ translation.Value }</td>
+							<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 max-w-[300px] truncate">{ translation.Value }</td>
 							<td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
 								<div class="flex space-x-2">
 									<button 
-										@click={ fmt.Sprintf("editTranslation({id: %d, key: '%s', value: '%s', language: '%s'})", translation.ID, translation.Key, translation.Value, translation.Language) }
+										@click={ fmt.Sprintf("editTranslation(%s)", pipes.Json(translation))}
 										class="text-blue-600 hover:text-blue-900 text-sm font-medium"
 									>
 										Edit

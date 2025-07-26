@@ -118,7 +118,16 @@ templ ProductDetailData(product models.Product, relatedProducts []models.Product
 					name: { fmt.Sprintf("'%s'", product.Name) },
 					price: { fmt.Sprintf("%.2f", product.Price) },
 					description: { fmt.Sprintf("'%s'", product.Description) },
-					category: { fmt.Sprintf("'%s'", product.Category) },
+					categories: [
+						if len(product.Categories) > 0 {
+							for i, cat := range product.Categories {
+								if i > 0 {
+									,
+								}
+								{id: { fmt.Sprintf("%d", cat.ID) }, name: { fmt.Sprintf("'%s'", cat.Name) }}
+							}
+						}
+					],
 					stock: { strconv.Itoa(product.Stock) },
 					status: { fmt.Sprintf("'%s'", product.Status) }
 				}
@@ -142,15 +151,15 @@ templ ProductNotFound(webconfig types.WebConfig) {
 	</div>
 }
 
-templ CategoriesList(categories []string, webconfig types.WebConfig) {
+templ CategoriesList(categories []models.Category, webconfig types.WebConfig) {
 	<label class="flex items-center">
-		<input type="radio" value="" x-model="filters.category" @change="applyFilters()" class="text-yellow-500 focus:ring-yellow-500" style="accent-color: #f4cc1d;" />
+		<input type="checkbox" value="" x-model="filters.categoryIds" @change="applyFilters()" class="text-yellow-500 focus:ring-yellow-500" style="accent-color: #f4cc1d;" />
 		<span class="ml-2 text-sm text-gray-700">{ webconfig.Translations["product.all_categories"] }</span>
 	</label>
 	for _, category := range categories {
 		<label class="flex items-center">
-			<input type="radio" value={ category } x-model="filters.category" @change="applyFilters()" class="text-yellow-500 focus:ring-yellow-500" style="accent-color: #f4cc1d;" />
-			<span class="ml-2 text-sm text-gray-700 capitalize">{ category }</span>
+			<input type="checkbox" value={ fmt.Sprintf("%d", category.ID) } x-model="filters.categoryIds" @change="applyFilters()" class="text-yellow-500 focus:ring-yellow-500" style="accent-color: #f4cc1d;" />
+			<span class="ml-2 text-sm text-gray-700 capitalize">{ category.Name }</span>
 		</label>
 	}
 } 
