@@ -21,7 +21,7 @@ func main() {
 	users.Populate()
 	general_settings.Populate()
 	translations.Populate()
-	
+
 	if err := categories.SeedCategories(); err != nil {
 		log.Fatal("Failed to seed categories:", err)
 	}

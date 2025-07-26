@@ -28,3 +28,4 @@ go.work
 routes.json
 archive
 .web
+*.giant

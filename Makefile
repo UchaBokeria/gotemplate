@@ -49,6 +49,10 @@ drop:
 seed:
 	go run ./cmd/databases/postgres/seed/main.go
 
+.PHONY: parser
+parser:
+	go run ./cmd/parsers/main.go
+
 
 .PHONY: vet
 vet:

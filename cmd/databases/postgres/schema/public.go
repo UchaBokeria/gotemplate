@@ -5,10 +5,10 @@ import (
 )
 
 var Models = []interface{}{
+	&models.Category{},
 	&models.Users{},
 	&models.GeneralSettings{},
 	&models.Translation{},
-	&models.Category{},
 	&models.Product{},
 	&models.ProductCategory{},
 	&models.Invoice{},

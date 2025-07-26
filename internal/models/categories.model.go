@@ -8,9 +8,12 @@ import (
 
 type Category struct {
 	ID          uint           `gorm:"primarykey" json:"id"`
-	Name        string         `gorm:"size:255;not null" json:"name"`
-	Slug        string         `gorm:"size:255;not null;uniqueIndex" json:"slug"`
+	Name        string         `gorm:"size:255;" json:"name"`
+	Label       string         `gorm:"size:255;" json:"label"` // Additional label field as requested
+	Slug        string         `gorm:"size:255;" json:"slug"`
 	Description string         `gorm:"type:text" json:"description"`
+	RID         string         `gorm:"size:255;index" json:"rid"` // RID field for JSON data mapping
+	Type        string         `gorm:"size:50;index" json:"type"` // Type: vehicle, maker, model, type, parts
 	ParentID    *uint          `gorm:"index" json:"parentId"`
 	Parent      *Category      `gorm:"foreignKey:ParentID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;" json:"parent,omitempty"`
 	Children    []Category     `gorm:"foreignKey:ParentID" json:"children,omitempty"`
