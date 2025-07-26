@@ -13,13 +13,14 @@ func New(router *echo.Group) {
 
 	// CRUD operations
 	categoriesGroup.GET("/list", controller.Set[dtos.CategoryListDto](list))
-	categoriesGroup.GET("/tree", controller.Set[dtos.CategoryListDto](tree))
 	categoriesGroup.GET("/:id", controller.Set[dto.ByID](show))
 	categoriesGroup.POST("", controller.Set[dtos.CreateCategoryDto](create))
 	categoriesGroup.PUT("/:id", controller.Set[dtos.UpdateCategoryDto](update))
 	categoriesGroup.DELETE("/:id", controller.Set[dto.ByID](deleteCategory))
-	
-	// Additional tree operations
-	categoriesGroup.GET("/:id/children", controller.Set[dto.ByID](getChildren))
-	categoriesGroup.POST("/:id/move", controller.Set[dtos.UpdateCategoryDto](moveCategory))
-} 
+
+	// Helper endpoints for filters
+	categoriesGroup.GET("/by-type/:type", func(c echo.Context) error {
+		categoryType := c.Param("type")
+		return getCategoriesByType(&controller.Context{Context: c}, categoryType)
+	})
+}

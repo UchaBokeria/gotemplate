@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	"time"
 
 	"gorm.io/gorm"
@@ -42,6 +43,38 @@ type ProductCategory struct {
 
 func (ProductCategory) TableName() string {
 	return "product_categories"
+}
+
+// BeforeCreate hook to validate category level
+func (pc *ProductCategory) BeforeCreate(tx *gorm.DB) error {
+	var category Category
+	if err := tx.First(&category, pc.CategoryID).Error; err != nil {
+		return err
+	}
+	
+	// Only allow level 4 categories (parts level) to be associated with products
+	if category.Level != 4 {
+		return fmt.Errorf("products can only be associated with level 4 categories (parts), category '%s' is level %d", category.Name, category.Level)
+	}
+	
+	return nil
+}
+
+// BeforeUpdate hook to validate category level on updates
+func (pc *ProductCategory) BeforeUpdate(tx *gorm.DB) error {
+	if tx.Statement.Changed("CategoryID") {
+		var category Category
+		if err := tx.First(&category, pc.CategoryID).Error; err != nil {
+			return err
+		}
+		
+		// Only allow level 4 categories (parts level) to be associated with products
+		if category.Level != 4 {
+			return fmt.Errorf("products can only be associated with level 4 categories (parts), category '%s' is level %d", category.Name, category.Level)
+		}
+	}
+	
+	return nil
 }
 
 // BeforeCreate hook to set the path and level for new categories

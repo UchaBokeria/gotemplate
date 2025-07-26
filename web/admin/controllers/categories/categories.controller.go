@@ -3,6 +3,8 @@ package categories
 import (
 	"fmt"
 	"net/http"
+	"regexp"
+	"strconv"
 	"strings"
 
 	"main/internal/models"
@@ -19,79 +21,80 @@ func list(ctx *controller.Context, listDto *dtos.CategoryListDto) error {
 	var categories []models.Category
 	var total int64
 
-	query := storage.DB.Model(&models.Category{})
+	query := storage.DB.Model(&models.Category{}).Preload("Parent").Preload("Children")
 
+	// Apply filters
 	if listDto.Search != "" {
-		query = query.Where("name ILIKE ? OR description ILIKE ?",
-			"%"+listDto.Search+"%", "%"+listDto.Search+"%")
+		query = query.Where("name ILIKE ? OR label ILIKE ? OR description ILIKE ?",
+			"%"+listDto.Search+"%", "%"+listDto.Search+"%", "%"+listDto.Search+"%")
 	}
 
-	if listDto.ParentID != nil {
-		query = query.Where("parent_id = ?", *listDto.ParentID)
-	}
-
-	if listDto.IsActive != nil {
-		query = query.Where("is_active = ?", *listDto.IsActive)
+	if listDto.Path != "" {
+		query = query.Where("path ILIKE ?", "%"+listDto.Path+"%")
 	}
 
 	if listDto.Level != nil {
 		query = query.Where("level = ?", *listDto.Level)
 	}
 
-	query.Count(&total)
-
-	if listDto.Page < 1 {
-		listDto.Page = 1
-	}
-	if listDto.Limit < 1 {
-		listDto.Limit = 100
+	if listDto.ParentID != nil {
+		query = query.Where("parent_id = ?", *listDto.ParentID)
 	}
 
-	offset := (listDto.Page - 1) * listDto.Limit
-	query = query.Offset(offset).Limit(listDto.Limit)
-
-	query = query.Order("level ASC, sort_order ASC, name ASC")
-
-	if err := query.Find(&categories).Error; err != nil {
-		return ctx.String(http.StatusInternalServerError, "Failed to fetch categories: "+err.Error())
+	if listDto.Type != "" {
+		query = query.Where("type = ?", listDto.Type)
 	}
 
-	// Check if this is an HTMX request for table view
-	if ctx.Request().Header.Get("HX-Request") != "" {
-		return ctx.Html(components.CategoriesTable(categories))
+	if len(listDto.VehicleIDs) > 0 {
+		query = query.Where("type = ? AND id IN ?", "vehicle", listDto.VehicleIDs)
 	}
 
-	// Return JSON for API calls (like from product form)
-	return ctx.JSON(http.StatusOK, map[string]interface{}{
-		"categories": categories,
-		"total":      total,
-	})
-}
+	if len(listDto.MakerIDs) > 0 {
+		query = query.Where("type = ? AND id IN ?", "maker", listDto.MakerIDs)
+	}
 
-func tree(ctx *controller.Context, listDto *dtos.CategoryListDto) error {
-	var categories []models.Category
+	if len(listDto.ModelIDs) > 0 {
+		query = query.Where("type = ? AND id IN ?", "model", listDto.ModelIDs)
+	}
 
-	query := storage.DB.Model(&models.Category{})
+	if len(listDto.TypeIDs) > 0 {
+		query = query.Where("type = ? AND id IN ?", "type", listDto.TypeIDs)
+	}
 
-	if listDto.Search != "" {
-		query = query.Where("name ILIKE ? OR description ILIKE ?",
-			"%"+listDto.Search+"%", "%"+listDto.Search+"%")
+	if len(listDto.CategoryIDs) > 0 {
+		query = query.Where("type = ? AND id IN ?", "parts", listDto.CategoryIDs)
 	}
 
 	if listDto.IsActive != nil {
 		query = query.Where("is_active = ?", *listDto.IsActive)
 	}
 
-	query = query.Order("level ASC, sort_order ASC, name ASC")
+	query.Count(&total)
 
-	if err := query.Find(&categories).Error; err != nil {
-		return ctx.String(http.StatusInternalServerError, "Failed to fetch categories: "+err.Error())
+	if listDto.TreeView {
+		// For tree view, get all categories and organize them hierarchically
+		query = query.Order("level ASC, sort_order ASC, name ASC")
+		if err := query.Find(&categories).Error; err != nil {
+			return ctx.String(http.StatusInternalServerError, "Failed to fetch categories: "+err.Error())
+		}
+		return ctx.Html(components.CategoriesTree(categories))
+	} else {
+		// Regular pagination for table view
+		if listDto.Page < 1 {
+			listDto.Page = 1
+		}
+		if listDto.Limit < 1 {
+			listDto.Limit = 100
+		}
+
+		offset := (listDto.Page - 1) * listDto.Limit
+		query = query.Offset(offset).Limit(listDto.Limit).Order("level ASC, sort_order ASC, name ASC")
+
+		if err := query.Find(&categories).Error; err != nil {
+			return ctx.String(http.StatusInternalServerError, "Failed to fetch categories: "+err.Error())
+		}
+		return ctx.Html(components.CategoriesTree(categories))
 	}
-
-	// Build tree structure
-	treeCategories := buildCategoryTree(categories)
-
-	return ctx.Html(components.CategoriesTree(treeCategories))
 }
 
 func show(ctx *controller.Context, idDto *dto.ByID) error {
@@ -104,61 +107,108 @@ func show(ctx *controller.Context, idDto *dto.ByID) error {
 		return ctx.String(http.StatusInternalServerError, "Failed to fetch category: "+err.Error())
 	}
 
-	return ctx.String(http.StatusOK, fmt.Sprintf("Category: %s (Level: %d) - %s",
-		category.Name, category.Level, category.Description))
+	return ctx.String(http.StatusOK, fmt.Sprintf("Category: %s (Level: %d, Type: %s)",
+		category.Name, category.Level, category.Type))
 }
 
 func create(ctx *controller.Context, createDto *dtos.CreateCategoryDto) error {
+	// Generate slug from name
+	categorySlug := generateSlug(createDto.Name)
+
+	// Determine type and level based on parent
 	category := models.Category{
 		Name:        createDto.Name,
-		Slug:        createDto.Slug,
+		Label:       createDto.Label,
+		Slug:        categorySlug,
 		Description: createDto.Description,
-		ParentID:    createDto.ParentID,
 		SortOrder:   createDto.SortOrder,
 		IsActive:    createDto.IsActive,
 	}
 
+	if createDto.ParentID != "" {
+		parentID, err := strconv.ParseUint(createDto.ParentID, 10, 64)
+		if err != nil {
+			return ctx.String(http.StatusBadRequest, "Invalid parent ID")
+		}
+		var parent models.Category
+		if err := storage.DB.First(&parent, parentID).Error; err != nil {
+			return ctx.String(http.StatusBadRequest, "Parent category not found")
+		}
+
+		category.Level = parent.Level + 1
+		category.Path = parent.Path + "/" + parent.Slug
+
+		// Determine type based on level
+		switch category.Level {
+		case 0:
+			category.Type = "vehicle"
+		case 1:
+			category.Type = "maker"
+		case 2:
+			category.Type = "model"
+		case 3:
+			category.Type = "type"
+		case 4:
+			category.Type = "parts"
+		default:
+			return ctx.String(http.StatusBadRequest, "Maximum category depth exceeded")
+		}
+	} else {
+		category.ParentID = nil
+		category.Level = 0
+		category.Path = ""
+		category.Type = "vehicle"
+	}
+
+	fmt.Println(category)
 	if err := storage.DB.Create(&category).Error; err != nil {
 		return ctx.String(http.StatusInternalServerError, "Failed to create category: "+err.Error())
 	}
 
+	// Return updated tree
 	var categories []models.Category
-	storage.DB.Order("level ASC, sort_order ASC, name ASC").Find(&categories)
-	treeCategories := buildCategoryTree(categories)
-	return ctx.Html(components.CategoriesTree(treeCategories))
+	storage.DB.Preload("Parent").Preload("Children").Order("level ASC, sort_order ASC, name ASC").Find(&categories)
+	return ctx.Html(components.CategoriesTree(categories))
 }
 
 func update(ctx *controller.Context, updateDto *dtos.UpdateCategoryDto) error {
 	var category models.Category
 
-	if err := storage.DB.First(&category, updateDto.ID).Error; err != nil {
+	if err := storage.DB.Preload("Parent").Preload("Children").First(&category, updateDto.ID).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return ctx.String(http.StatusNotFound, "Category not found")
 		}
 		return ctx.String(http.StatusInternalServerError, "Failed to find category: "+err.Error())
 	}
 
+	// Update only allowed fields (not RID, level, type, parent, path, slug)
 	category.Name = updateDto.Name
-	category.Slug = updateDto.Slug
+	category.Label = updateDto.Label
 	category.Description = updateDto.Description
-	category.ParentID = updateDto.ParentID
 	category.SortOrder = updateDto.SortOrder
 	category.IsActive = updateDto.IsActive
+
+	// Update slug if name changed
+	newSlug := generateSlug(updateDto.Name)
+	if category.Slug != newSlug {
+		category.Slug = newSlug
+		// Note: Path will be updated automatically by the model's BeforeUpdate hook
+	}
 
 	if err := storage.DB.Save(&category).Error; err != nil {
 		return ctx.String(http.StatusInternalServerError, "Failed to update category: "+err.Error())
 	}
 
+	// Return updated tree
 	var categories []models.Category
-	storage.DB.Order("level ASC, sort_order ASC, name ASC").Find(&categories)
-	treeCategories := buildCategoryTree(categories)
-	return ctx.Html(components.CategoriesTree(treeCategories))
+	storage.DB.Preload("Parent").Preload("Children").Order("level ASC, sort_order ASC, name ASC").Find(&categories)
+	return ctx.Html(components.CategoriesTree(categories))
 }
 
 func deleteCategory(ctx *controller.Context, deleteDto *dto.ByID) error {
 	var category models.Category
 
-	if err := storage.DB.First(&category, deleteDto.ID).Error; err != nil {
+	if err := storage.DB.Preload("Children").First(&category, deleteDto.ID).Error; err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return ctx.String(http.StatusNotFound, "Category not found")
 		}
@@ -166,100 +216,54 @@ func deleteCategory(ctx *controller.Context, deleteDto *dto.ByID) error {
 	}
 
 	// Check if category has children
-	var childCount int64
-	storage.DB.Model(&models.Category{}).Where("parent_id = ?", category.ID).Count(&childCount)
-	if childCount > 0 {
-		return ctx.String(http.StatusConflict, "Cannot delete category with subcategories")
+	if len(category.Children) > 0 {
+		return ctx.String(http.StatusBadRequest, "Cannot delete category with children. Please delete or move child categories first.")
 	}
 
-	// Check if category is used by products
+	// Check if category is associated with any products
 	var productCount int64
 	storage.DB.Model(&models.ProductCategory{}).Where("category_id = ?", category.ID).Count(&productCount)
 	if productCount > 0 {
-		return ctx.String(http.StatusConflict, "Cannot delete category that is assigned to products")
+		return ctx.String(http.StatusBadRequest, "Cannot delete category that is associated with products. Please remove product associations first.")
 	}
 
 	if err := storage.DB.Delete(&category).Error; err != nil {
 		return ctx.String(http.StatusInternalServerError, "Failed to delete category: "+err.Error())
 	}
 
+	// Return updated tree
 	var categories []models.Category
-	storage.DB.Order("level ASC, sort_order ASC, name ASC").Find(&categories)
-	treeCategories := buildCategoryTree(categories)
-	return ctx.Html(components.CategoriesTree(treeCategories))
+	storage.DB.Preload("Parent").Preload("Children").Order("level ASC, sort_order ASC, name ASC").Find(&categories)
+	return ctx.Html(components.CategoriesTree(categories))
 }
 
-func getChildren(ctx *controller.Context, idDto *dto.ByID) error {
-	var children []models.Category
-
-	if err := storage.DB.Where("parent_id = ?", idDto.ID).Order("sort_order ASC, name ASC").Find(&children).Error; err != nil {
-		return ctx.String(http.StatusInternalServerError, "Failed to fetch children: "+err.Error())
-	}
-
-	return ctx.Html(components.CategoriesTable(children))
-}
-
-func moveCategory(ctx *controller.Context, moveDto *dtos.UpdateCategoryDto) error {
-	var category models.Category
-
-	if err := storage.DB.First(&category, moveDto.ID).Error; err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return ctx.String(http.StatusNotFound, "Category not found")
-		}
-		return ctx.String(http.StatusInternalServerError, "Failed to find category: "+err.Error())
-	}
-
-	// Prevent moving category to itself or its descendants
-	if moveDto.ParentID != nil {
-		if *moveDto.ParentID == category.ID {
-			return ctx.String(http.StatusBadRequest, "Cannot move category to itself")
-		}
-
-		// Check if target parent is a descendant
-		var targetParent models.Category
-		if err := storage.DB.First(&targetParent, *moveDto.ParentID).Error; err != nil {
-			return ctx.String(http.StatusBadRequest, "Invalid parent category")
-		}
-
-		if strings.Contains(targetParent.Path, category.Slug) {
-			return ctx.String(http.StatusBadRequest, "Cannot move category to its descendant")
-		}
-	}
-
-	category.ParentID = moveDto.ParentID
-	category.SortOrder = moveDto.SortOrder
-
-	if err := storage.DB.Save(&category).Error; err != nil {
-		return ctx.String(http.StatusInternalServerError, "Failed to move category: "+err.Error())
-	}
-
+// Helper function to get categories for filters
+func getCategoriesByType(ctx *controller.Context, categoryType string) error {
 	var categories []models.Category
-	storage.DB.Order("level ASC, sort_order ASC, name ASC").Find(&categories)
-	treeCategories := buildCategoryTree(categories)
-	return ctx.Html(components.CategoriesTree(treeCategories))
+
+	query := storage.DB.Where("type = ? AND is_active = ?", categoryType, true).
+		Order("level ASC, sort_order ASC, name ASC")
+
+	if err := query.Find(&categories).Error; err != nil {
+		return ctx.String(http.StatusInternalServerError, "Failed to fetch categories: "+err.Error())
+	}
+
+	return ctx.JSON(http.StatusOK, map[string]interface{}{
+		"categories": categories,
+	})
 }
 
-// Helper function to build category tree structure
-func buildCategoryTree(categories []models.Category) []models.Category {
-	categoryMap := make(map[uint]*models.Category)
-	var rootCategories []models.Category
+// generateSlug creates a URL-friendly slug from a string
+func generateSlug(input string) string {
+	// Convert to lowercase
+	slug := strings.ToLower(input)
 
-	// First pass: create map of all categories
-	for i := range categories {
-		categoryMap[categories[i].ID] = &categories[i]
-		categories[i].Children = []models.Category{}
-	}
+	// Replace spaces and special characters with hyphens
+	re := regexp.MustCompile(`[^a-z0-9]+`)
+	slug = re.ReplaceAllString(slug, "-")
 
-	// Second pass: build tree structure
-	for i := range categories {
-		if categories[i].ParentID == nil {
-			rootCategories = append(rootCategories, categories[i])
-		} else {
-			if parent, exists := categoryMap[*categories[i].ParentID]; exists {
-				parent.Children = append(parent.Children, categories[i])
-			}
-		}
-	}
+	// Remove leading and trailing hyphens
+	slug = strings.Trim(slug, "-")
 
-	return rootCategories
+	return slug
 }

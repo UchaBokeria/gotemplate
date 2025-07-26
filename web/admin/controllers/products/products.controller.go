@@ -108,6 +108,14 @@ func create(ctx *controller.Context, createDto *dtos.CreateProductDto) error {
 			return ctx.String(http.StatusInternalServerError, "Failed to find categories: "+err.Error())
 		}
 
+		// Validate that all categories are level 4 (parts level)
+		for _, category := range categories {
+			if category.Level != 4 {
+				tx.Rollback()
+				return ctx.String(http.StatusBadRequest, fmt.Sprintf("Products can only be associated with level 4 categories (parts). Category '%s' is level %d", category.Name, category.Level))
+			}
+		}
+
 		if err := tx.Model(&product).Association("Categories").Append(categories); err != nil {
 			tx.Rollback()
 			return ctx.String(http.StatusInternalServerError, "Failed to associate categories: "+err.Error())
@@ -162,6 +170,14 @@ func update(ctx *controller.Context, updateDto *dtos.UpdateProductDto) error {
 		if err := tx.Find(&categories, categoryIDs).Error; err != nil {
 			tx.Rollback()
 			return ctx.String(http.StatusInternalServerError, "Failed to find categories: "+err.Error())
+		}
+
+		// Validate that all categories are level 4 (parts level)
+		for _, category := range categories {
+			if category.Level != 4 {
+				tx.Rollback()
+				return ctx.String(http.StatusBadRequest, fmt.Sprintf("Products can only be associated with level 4 categories (parts). Category '%s' is level %d", category.Name, category.Level))
+			}
 		}
 
 		if err := tx.Model(&product).Association("Categories").Append(categories); err != nil {

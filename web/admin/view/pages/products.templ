@@ -22,7 +22,7 @@ templ Products() {
 
 				async loadCategories() {
 					try {
-						const response = await fetch('/admin/categories/list');
+						const response = await fetch('/admin/categories/list-for-products');
 						const data = await response.json();
 						this.availableCategories = data.categories || [];
 						this.filteredCategories = this.availableCategories;
@@ -48,7 +48,9 @@ templ Products() {
 						const query = this.searchQuery.toLowerCase();
 						this.filteredCategories = this.availableCategories.filter(category =>
 							category.name.toLowerCase().includes(query) ||
-							(category.path && category.path.toLowerCase().includes(query))
+							(category.label && category.label.toLowerCase().includes(query)) ||
+							(category.path && category.path.toLowerCase().includes(query)) ||
+							(category.fullPath && category.fullPath.toLowerCase().includes(query))
 						);
 					}
 					this.isDropdownOpen = this.filteredCategories.length > 0;
@@ -59,7 +61,9 @@ templ Products() {
 						this.selectedCategories.push({
 							id: category.id,
 							name: category.name,
-							path: category.path
+							label: category.label,
+							path: category.path,
+							fullPath: category.fullPath
 						});
 						// Update parent form data
 						if (typeof productsConfig !== 'undefined') {
@@ -313,7 +317,7 @@ templ ProductDialog() {
 					<div x-show="selectedCategories.length > 0" class="flex flex-wrap gap-2">
 						<template x-for="category in selectedCategories" :key="category.id">
 							<span class="inline-flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-800 rounded-md text-sm">
-								<span x-text="category.name"></span>
+								<span x-text="category.fullPath || category.name"></span>
 								<button 
 									type="button" 
 									@click="removeCategory(category.id)"
@@ -368,7 +372,7 @@ templ ProductDialog() {
 							<div class="flex items-center justify-between">
 								<div class="flex-1">
 									<div class="font-medium" x-text="category.name"></div>
-									<div x-show="category.path" class="text-xs text-gray-500" x-text="category.path"></div>
+									<div x-show="category.fullPath" class="text-xs text-gray-500" x-text="category.fullPath"></div>
 								</div>
 								<div x-show="isSelected(category.id)" class="text-blue-600">
 									<svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
